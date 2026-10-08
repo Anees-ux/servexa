@@ -1,0 +1,53 @@
+# Servexa - Repository EditorConfig
+root = true
+
+# Global formatting rules
+[*]
+charset = utf-8
+end_of_line = crlf
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{cs,csx}]
+# Code style - Correctness and quality (Enforced as warnings, elevated to errors when TreatWarningsAsErrors is true)
+dotnet_diagnostic.IDE0051.severity = warning # Remove unused private members
+dotnet_diagnostic.IDE0052.severity = warning # Remove unread private members
+dotnet_diagnostic.IDE0059.severity = warning # Unnecessary assignment of a value
+
+# Code style - Style and cleanup preferences (Suggestions / Informational, non-blocking)
+dotnet_diagnostic.IDE0005.severity = suggestion # Unnecessary using directive (suggestion in build to avoid requiring GenerateDocumentationFile)
+dotnet_diagnostic.IDE0007.severity = suggestion # var preferences
+dotnet_diagnostic.IDE0008.severity = suggestion # var preferences
+dotnet_diagnostic.IDE0011.severity = suggestion # Add braces
+dotnet_diagnostic.IDE0022.severity = suggestion # Use expression body for methods
+dotnet_diagnostic.IDE0040.severity = suggestion # Add accessibility modifiers
+dotnet_diagnostic.IDE0055.severity = suggestion # Formatting
+dotnet_diagnostic.IDE0060.severity = suggestion # Remove unused parameter
+dotnet_diagnostic.IDE0130.severity = suggestion # Namespace does not match folder structure
+dotnet_diagnostic.IDE0160.severity = suggestion # File-scoped namespace
+dotnet_diagnostic.IDE0161.severity = suggestion # File-scoped namespace
+dotnet_diagnostic.IDE0290.severity = suggestion # Use primary constructor
+
+# CA Rules - Practical adjustments
+dotnet_diagnostic.CA1848.severity = suggestion # Use LoggerMessage delegates instead of ILogger extension methods
+
+# Category severities (Enable correctness and reliability, do not globally disable categories)
+dotnet_analyzer_diagnostic.category-Security.severity = warning
+dotnet_analyzer_diagnostic.category-Reliability.severity = warning
+dotnet_analyzer_diagnostic.category-Usage.severity = warning
+
+# Unit and architecture test projects - allow underscores in test method names (Given_When_Then convention)
+[**/*Tests.cs]
+dotnet_diagnostic.CA1707.severity = suggestion
+dotnet_diagnostic.CA2007.severity = suggestion
+
+# EF Core Migrations and designer files
+# Treat migrations and designers as generated code to prevent stylistic noise on EF Core generated artifacts,
+# without disabling compiler errors or critical diagnostics.
+[**/Migrations/**]
+generated_code = true
+
+[*.Designer.cs]
+generated_code = true
