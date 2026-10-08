@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build, Test & Audit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore Servexa.sln
+
+      - name: Build solution (Release)
+        run: dotnet build Servexa.sln --configuration Release --no-restore /p:TreatWarningsAsErrors=true
+
+      - name: Run solution tests (Release)
+        run: dotnet test Servexa.sln --configuration Release --no-build
+
+      - name: Audit NuGet dependencies for vulnerabilities
+        run: |
+          dotnet list Servexa.sln package --vulnerable --include-transitive
+          dotnet restore Servexa.sln /p:NuGetAudit=true /p:NuGetAuditMode=all /p:NuGetAuditLevel=high /p:TreatWarningsAsErrors=true
