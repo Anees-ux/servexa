@@ -12,6 +12,11 @@ public class ServexaDbContext(DbContextOptions<ServexaDbContext> options) : DbCo
     public DbSet<Branch> Branches => Set<Branch>();
     public DbSet<Territory> Territories => Set<Territory>();
     public DbSet<TenantUser> TenantUsers => Set<TenantUser>();
+    public DbSet<Role> Roles => Set<Role>();
+    public DbSet<Permission> Permissions => Set<Permission>();
+    public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
+    public DbSet<RoleAssignment> RoleAssignments => Set<RoleAssignment>();
+    public DbSet<ScopeAssignment> ScopeAssignments => Set<ScopeAssignment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
