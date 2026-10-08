@@ -10,6 +10,8 @@ public class ServexaDbContext(DbContextOptions<ServexaDbContext> options) : DbCo
 {
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<Branch> Branches => Set<Branch>();
+    public DbSet<Territory> Territories => Set<Territory>();
+    public DbSet<TenantUser> TenantUsers => Set<TenantUser>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
