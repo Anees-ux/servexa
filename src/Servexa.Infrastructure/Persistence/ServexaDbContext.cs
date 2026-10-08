@@ -17,6 +17,9 @@ public class ServexaDbContext(DbContextOptions<ServexaDbContext> options) : DbCo
     public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
     public DbSet<RoleAssignment> RoleAssignments => Set<RoleAssignment>();
     public DbSet<ScopeAssignment> ScopeAssignments => Set<ScopeAssignment>();
+    public DbSet<PolicySetting> PolicySettings => Set<PolicySetting>();
+    public DbSet<NumberSeries> NumberSeries => Set<NumberSeries>();
+    public DbSet<FileObject> FileObjects => Set<FileObject>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
