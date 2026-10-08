@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Servexa.Domain.Platform.Entities;
 
 namespace Servexa.Infrastructure.Persistence;
 
@@ -7,6 +8,9 @@ namespace Servexa.Infrastructure.Persistence;
 /// </summary>
 public class ServexaDbContext(DbContextOptions<ServexaDbContext> options) : DbContext(options)
 {
+    public DbSet<Tenant> Tenants => Set<Tenant>();
+    public DbSet<Branch> Branches => Set<Branch>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
