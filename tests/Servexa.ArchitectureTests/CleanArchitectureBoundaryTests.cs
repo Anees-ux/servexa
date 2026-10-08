@@ -19,7 +19,7 @@ namespace Servexa.ArchitectureTests;
 /// </summary>
 public class CleanArchitectureBoundaryTests
 {
-    private static readonly Assembly DomainAssembly = typeof(Servexa.Domain.Platform.Entities.Tenant).Assembly;
+    private static readonly Assembly DomainAssembly = typeof(Servexa.Domain.Exceptions.DomainException).Assembly;
     private static readonly Assembly ApplicationAssembly = typeof(Servexa.Application.DependencyInjection).Assembly;
     private static readonly Assembly InfrastructureAssembly = typeof(Servexa.Infrastructure.Persistence.ServexaDbContext).Assembly;
     private static readonly Assembly ApiAssembly = typeof(Servexa.Api.Infrastructure.GlobalExceptionHandler).Assembly;
