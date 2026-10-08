@@ -100,8 +100,13 @@ public class CleanArchitectureBoundaryTests
         // Assert: Infrastructure must not reference API
         Assert.DoesNotContain("Servexa.Api", referencedAssemblies);
 
-        // Infrastructure may reference Domain
-        Assert.Contains("Servexa.Domain", referencedAssemblies);
+        // Any Servexa assembly reference that is emitted must only be Domain or Application
+        var servexaReferences = referencedAssemblies
+            .Where(a => a.StartsWith("Servexa.", StringComparison.Ordinal))
+            .ToList();
+
+        var allowed = new[] { "Servexa.Domain", "Servexa.Application" };
+        Assert.All(servexaReferences, r => Assert.Contains(r, allowed));
     }
 
     [Fact]
