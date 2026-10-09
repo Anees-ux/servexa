@@ -5,6 +5,7 @@ interface CardProps {
   subtitle?: string;
   action?: React.ReactNode;
   children: React.ReactNode;
+  noPadding?: boolean;
   style?: React.CSSProperties;
 }
 
@@ -13,6 +14,7 @@ export const Card: React.FC<CardProps> = ({
   subtitle,
   action,
   children,
+  noPadding,
   style,
 }) => {
   return (
@@ -51,7 +53,7 @@ export const Card: React.FC<CardProps> = ({
           {action && <div>{action}</div>}
         </div>
       )}
-      <div style={{ padding: '20px' }}>{children}</div>
+      <div style={{ padding: noPadding ? 0 : '20px' }}>{children}</div>
     </div>
   );
 };

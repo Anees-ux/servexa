@@ -7,7 +7,9 @@ import {
 import { Shell } from '../../workspaces/Shell';
 import { AccountsView } from '../../features/customers/AccountsView';
 import { SitesView } from '../../features/sites/SitesView';
-import { Card } from '../../shared/design-system/Card';
+import { AssetsView } from '../../features/assets/AssetsView';
+import { WorkOrdersView } from '../../features/work-orders/WorkOrdersView';
+import { DispatchView } from '../../features/dispatch/DispatchView';
 
 const rootRoute = createRootRoute({
   component: Shell,
@@ -31,31 +33,11 @@ const sitesRoute = createRoute({
   component: SitesView,
 });
 
-const WorkOrdersView = () => (
-  <Card title="Work Order Operations Spine">
-    <div style={{ padding: '20px 0', color: 'var(--text-secondary)' }}>
-      <p style={{ marginBottom: '12px' }}>
-        Work Order aggregate root is tied directly to Customer Accounts and Operational Sites configured in the previous tabs.
-      </p>
-      <div style={{ padding: '16px', backgroundColor: 'var(--bg-subtle)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
-        <strong>Next Batch:</strong> Work Order lifecycle (Draft → Approved → Scheduled → InProgress → OperationallyComplete), service scope items, and dispatch commitment.
-      </div>
-    </div>
-  </Card>
-);
-
-const DispatchView = () => (
-  <Card title="Dispatch & Scheduling Grid">
-    <div style={{ padding: '20px 0', color: 'var(--text-secondary)' }}>
-      <p style={{ marginBottom: '12px' }}>
-        Resource scheduling concurrency guard, booking windows, and technician assignments.
-      </p>
-      <div style={{ padding: '16px', backgroundColor: 'var(--bg-subtle)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
-        <strong>Next Batch:</strong> Resource scheduling, territory filtering, and shift commitment.
-      </div>
-    </div>
-  </Card>
-);
+const assetsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/assets',
+  component: AssetsView,
+});
 
 const workOrdersRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -73,6 +55,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   customersRoute,
   sitesRoute,
+  assetsRoute,
   workOrdersRoute,
   dispatchRoute,
 ]);

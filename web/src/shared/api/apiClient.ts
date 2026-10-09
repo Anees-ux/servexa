@@ -1,11 +1,19 @@
 import type {
   AccountDto,
+  AssetDto,
   AuthResponseDto,
+  ChangeAssetStatusRequest,
   CreateAccountRequest,
+  CreateAssetRequest,
+  CreateEquipmentModelRequest,
   CreateSiteRequest,
+  CreateWorkOrderRequest,
   CurrentUserDto,
+  EquipmentModelDto,
   PagedResult,
   SiteDto,
+  TransitionWorkOrderStatusRequest,
+  WorkOrderDto,
 } from './types';
 
 export interface ProblemDetailsResponse {
@@ -147,6 +155,101 @@ class ApiClient {
 
   public async createSite(req: CreateSiteRequest): Promise<SiteDto> {
     return this.request<SiteDto>('/sites', {
+      method: 'POST',
+      body: JSON.stringify(req),
+    });
+  }
+
+  // Equipment Models API
+  public async getEquipmentModels(search?: string, pageNumber = 1, pageSize = 20): Promise<PagedResult<EquipmentModelDto>> {
+    const params = new URLSearchParams();
+    if (search) params.set('search', search);
+    params.set('pageNumber', pageNumber.toString());
+    params.set('pageSize', pageSize.toString());
+
+    return this.request<PagedResult<EquipmentModelDto>>(`/equipment-models?${params.toString()}`);
+  }
+
+  public async createEquipmentModel(req: CreateEquipmentModelRequest): Promise<EquipmentModelDto> {
+    return this.request<EquipmentModelDto>('/equipment-models', {
+      method: 'POST',
+      body: JSON.stringify(req),
+    });
+  }
+
+  // Asset Registry API
+  public async getAssets(
+    siteId?: string,
+    ownerAccountId?: string,
+    equipmentModelId?: string,
+    search?: string,
+    pageNumber = 1,
+    pageSize = 20
+  ): Promise<PagedResult<AssetDto>> {
+    const params = new URLSearchParams();
+    if (siteId) params.set('siteId', siteId);
+    if (ownerAccountId) params.set('ownerAccountId', ownerAccountId);
+    if (equipmentModelId) params.set('equipmentModelId', equipmentModelId);
+    if (search) params.set('search', search);
+    params.set('pageNumber', pageNumber.toString());
+    params.set('pageSize', pageSize.toString());
+
+    return this.request<PagedResult<AssetDto>>(`/assets?${params.toString()}`);
+  }
+
+  public async getAssetById(id: string): Promise<AssetDto> {
+    return this.request<AssetDto>(`/assets/${id}`);
+  }
+
+  public async createAsset(req: CreateAssetRequest): Promise<AssetDto> {
+    return this.request<AssetDto>('/assets', {
+      method: 'POST',
+      body: JSON.stringify(req),
+    });
+  }
+
+  public async changeAssetStatus(id: string, req: ChangeAssetStatusRequest): Promise<AssetDto> {
+    return this.request<AssetDto>(`/assets/${id}/status`, {
+      method: 'POST',
+      body: JSON.stringify(req),
+    });
+  }
+
+  // Work Orders API
+  public async getWorkOrders(
+    serviceAccountId?: string,
+    primarySiteId?: string,
+    operationalStatus?: number,
+    priority?: number,
+    search?: string,
+    pageNumber = 1,
+    pageSize = 20
+  ): Promise<PagedResult<WorkOrderDto>> {
+    const params = new URLSearchParams();
+    if (serviceAccountId) params.set('serviceAccountId', serviceAccountId);
+    if (primarySiteId) params.set('primarySiteId', primarySiteId);
+    if (operationalStatus !== undefined && operationalStatus !== null) params.set('operationalStatus', operationalStatus.toString());
+    if (priority !== undefined && priority !== null) params.set('priority', priority.toString());
+    if (search) params.set('search', search);
+    params.set('pageNumber', pageNumber.toString());
+    params.set('pageSize', pageSize.toString());
+
+    return this.request<PagedResult<WorkOrderDto>>(`/work-orders?${params.toString()}`);
+  }
+
+  public async getWorkOrderById(id: string): Promise<WorkOrderDto> {
+    return this.request<WorkOrderDto>(`/work-orders/${id}`);
+  }
+
+  public async createWorkOrder(req: CreateWorkOrderRequest): Promise<WorkOrderDto> {
+    return this.request<WorkOrderDto>('/work-orders', {
+      method: 'POST',
+      body: JSON.stringify(req),
+    });
+  }
+
+  public async transitionWorkOrderStatus(id: string, req: TransitionWorkOrderStatusRequest): Promise<WorkOrderDto> {
+    return this.request<WorkOrderDto>(`/work-orders/${id}/transition`, {
       method: 'POST',
       body: JSON.stringify(req),
     });

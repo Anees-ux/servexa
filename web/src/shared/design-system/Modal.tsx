@@ -5,7 +5,9 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
+  subtitle?: string;
   children: React.ReactNode;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   maxWidth?: string;
 }
 
@@ -13,11 +15,22 @@ export const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
   title,
+  subtitle,
   children,
-  maxWidth = '550px',
+  size = 'md',
+  maxWidth,
 }) => {
   const dialogRef = useRef<HTMLDivElement>(null);
   const previousActiveElementRef = useRef<HTMLElement | null>(null);
+
+  const sizeWidthMap: Record<'sm' | 'md' | 'lg' | 'xl', string> = {
+    sm: '420px',
+    md: '550px',
+    lg: '720px',
+    xl: '880px',
+  };
+
+  const computedMaxWidth = maxWidth || sizeWidthMap[size];
 
   useEffect(() => {
     if (!isOpen) return;
@@ -106,7 +119,7 @@ export const Modal: React.FC<ModalProps> = ({
         aria-labelledby="modal-title"
         style={{
           width: '100%',
-          maxWidth,
+          maxWidth: computedMaxWidth,
           backgroundColor: 'var(--bg-surface)',
           borderRadius: 'var(--radius-lg)',
           boxShadow: 'var(--shadow-lg)',
@@ -124,12 +137,19 @@ export const Modal: React.FC<ModalProps> = ({
             justifyContent: 'space-between',
           }}
         >
-          <h2
-            id="modal-title"
-            style={{ fontSize: '17px', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}
-          >
-            {title}
-          </h2>
+          <div>
+            <h2
+              id="modal-title"
+              style={{ fontSize: '17px', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}
+            >
+              {title}
+            </h2>
+            {subtitle && (
+              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '2px 0 0' }}>
+                {subtitle}
+              </p>
+            )}
+          </div>
           <button
             type="button"
             onClick={onClose}

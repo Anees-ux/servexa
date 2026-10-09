@@ -232,6 +232,11 @@ export const Shell: React.FC = () => {
             <span>Sites & Facilities</span>
           </Link>
 
+          <Link to="/assets" style={getNavLinkStyle(isNavActive('/assets'))}>
+            <Boxes size={17} />
+            <span>Asset Registry</span>
+          </Link>
+
           <Link to="/work-orders" style={getNavLinkStyle(isNavActive('/work-orders'))}>
             <ClipboardList size={17} />
             <span>Work Orders</span>
@@ -254,20 +259,6 @@ export const Shell: React.FC = () => {
             }}
           >
             Next Verticals
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '8px 12px',
-              fontSize: '13px',
-              color: 'var(--text-muted)',
-            }}
-          >
-            <Boxes size={16} />
-            <span>Asset Registry</span>
           </div>
 
           <div
