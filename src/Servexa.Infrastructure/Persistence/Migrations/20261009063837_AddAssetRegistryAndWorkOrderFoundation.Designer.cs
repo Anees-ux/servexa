@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Servexa.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using Servexa.Infrastructure.Persistence;
 namespace Servexa.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ServexaDbContext))]
-    partial class ServexaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261009063837_AddAssetRegistryAndWorkOrderFoundation")]
+    partial class AddAssetRegistryAndWorkOrderFoundation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -89,60 +92,6 @@ namespace Servexa.Infrastructure.Persistence.Migrations
                     b.HasIndex("TenantId", "Status");
 
                     b.ToTable("Assets", "assets");
-                });
-
-            modelBuilder.Entity("Servexa.Domain.Assets.Entities.AssetLifecycleEvent", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ActorUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("AssetId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<short>("EventType")
-                        .HasColumnType("smallint");
-
-                    b.Property<Guid?>("FromOwnerAccountId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("FromSiteId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<short?>("NewStatus")
-                        .HasColumnType("smallint");
-
-                    b.Property<DateTime>("OccurredAtUtc")
-                        .HasPrecision(3)
-                        .HasColumnType("datetime2(3)");
-
-                    b.Property<short?>("PreviousStatus")
-                        .HasColumnType("smallint");
-
-                    b.Property<string>("Reason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime>("RecordedAtUtc")
-                        .HasPrecision(3)
-                        .HasColumnType("datetime2(3)");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ToOwnerAccountId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ToSiteId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TenantId", "AssetId", "OccurredAtUtc");
-
-                    b.ToTable("AssetLifecycleEvents", "assets");
                 });
 
             modelBuilder.Entity("Servexa.Domain.Assets.Entities.EquipmentModel", b =>
@@ -1210,16 +1159,6 @@ namespace Servexa.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Servexa.Domain.Assets.Entities.AssetLifecycleEvent", b =>
-                {
-                    b.HasOne("Servexa.Domain.Assets.Entities.Asset", null)
-                        .WithMany("LifecycleEvents")
-                        .HasForeignKey("TenantId", "AssetId")
-                        .HasPrincipalKey("TenantId", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Servexa.Domain.Customers.Entities.Account", b =>
                 {
                     b.HasOne("Servexa.Domain.Platform.Entities.Tenant", null)
@@ -1464,11 +1403,6 @@ namespace Servexa.Infrastructure.Persistence.Migrations
                         .HasPrincipalKey("TenantId", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Servexa.Domain.Assets.Entities.Asset", b =>
-                {
-                    b.Navigation("LifecycleEvents");
                 });
 
             modelBuilder.Entity("Servexa.Domain.Platform.Entities.Role", b =>

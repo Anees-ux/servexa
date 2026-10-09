@@ -40,10 +40,16 @@ public static class DependencyInjection
         services.AddScoped<ITenantResolutionService, TenantResolutionService>();
         services.AddScoped<IDevDataSeeder, DevDataSeeder>();
 
+        // Services
+        services.AddScoped<INumberSeriesService, Services.NumberSeriesService>();
+
         // Aggregate-specific Repositories & Unit of Work
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IAccountRepository, AccountRepository>();
         services.AddScoped<ISiteRepository, SiteRepository>();
+        services.AddScoped<Application.Assets.Repositories.IEquipmentModelRepository, EquipmentModelRepository>();
+        services.AddScoped<Application.Assets.Repositories.IAssetRepository, AssetRepository>();
+        services.AddScoped<Application.Service.Repositories.IWorkOrderRepository, WorkOrderRepository>();
 
         return services;
     }

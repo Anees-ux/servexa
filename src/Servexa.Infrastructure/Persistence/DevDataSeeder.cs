@@ -42,6 +42,9 @@ public sealed class DevDataSeeder(ServexaDbContext dbContext) : IDevDataSeeder
             Capabilities.SiteView,
             Capabilities.SiteCreate,
             Capabilities.SiteUpdate,
+            Capabilities.AssetView,
+            Capabilities.AssetCreate,
+            Capabilities.AssetUpdate,
             Capabilities.WorkOrderView,
             Capabilities.WorkOrderCreate,
             Capabilities.WorkOrderComplete,
@@ -65,19 +68,22 @@ public sealed class DevDataSeeder(ServexaDbContext dbContext) : IDevDataSeeder
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // 4. Ensure Roles exist
-        var adminRole = await dbContext.Roles.FirstOrDefaultAsync(r => r.TenantId == DevTenantId && r.Name == "OperationsAdmin", cancellationToken);
+        var adminRole = await dbContext.Roles
+            .Include(r => r.Permissions)
+            .FirstOrDefaultAsync(r => r.TenantId == DevTenantId && r.Name == "OperationsAdmin", cancellationToken);
+
         if (adminRole == null)
         {
             adminRole = new Role(DevTenantId, "OperationsAdmin", isSystem: true);
             await dbContext.Roles.AddAsync(adminRole, cancellationToken);
             await dbContext.SaveChangesAsync(cancellationToken);
-
-            foreach (var perm in existingPermissions)
-            {
-                adminRole.AddPermission(perm.Id);
-            }
-            await dbContext.SaveChangesAsync(cancellationToken);
         }
+
+        foreach (var perm in existingPermissions)
+        {
+            adminRole.AddPermission(perm.Id);
+        }
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         // 5. Ensure TenantUsers exist
         var adminUser = await dbContext.TenantUsers.FirstOrDefaultAsync(u => u.TenantId == DevTenantId && u.Id == DevAdminUserId, cancellationToken);

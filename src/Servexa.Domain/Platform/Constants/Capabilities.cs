@@ -16,6 +16,11 @@ public static class Capabilities
     public const string SiteCreate = "Site.Create";
     public const string SiteUpdate = "Site.Update";
 
+    // Asset Registry Capabilities
+    public const string AssetView = "Asset.View";
+    public const string AssetCreate = "Asset.Create";
+    public const string AssetUpdate = "Asset.Update";
+
     // Service & Work Order Capabilities
     public const string WorkOrderView = "WorkOrder.View";
     public const string WorkOrderCreate = "WorkOrder.Create";

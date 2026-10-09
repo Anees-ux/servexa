@@ -27,6 +27,16 @@ public class ServexaDbContext(DbContextOptions<ServexaDbContext> options) : DbCo
     public DbSet<Site> Sites => Set<Site>();
     public DbSet<SiteAccountRelationship> SiteAccountRelationships => Set<SiteAccountRelationship>();
 
+    // Assets Module
+    public DbSet<Domain.Assets.Entities.EquipmentModel> EquipmentModels => Set<Domain.Assets.Entities.EquipmentModel>();
+    public DbSet<Domain.Assets.Entities.Asset> Assets => Set<Domain.Assets.Entities.Asset>();
+    public DbSet<Domain.Assets.Entities.AssetLifecycleEvent> AssetLifecycleEvents => Set<Domain.Assets.Entities.AssetLifecycleEvent>();
+
+    // Service Module
+    public DbSet<Domain.Service.Entities.WorkOrder> WorkOrders => Set<Domain.Service.Entities.WorkOrder>();
+    public DbSet<Domain.Service.Entities.WorkOrderAsset> WorkOrderAssets => Set<Domain.Service.Entities.WorkOrderAsset>();
+    public DbSet<Domain.Service.Entities.WorkOrderStatusHistory> WorkOrderStatusHistories => Set<Domain.Service.Entities.WorkOrderStatusHistory>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
