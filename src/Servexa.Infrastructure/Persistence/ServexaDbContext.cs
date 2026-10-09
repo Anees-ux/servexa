@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Servexa.Domain.Customers.Entities;
 using Servexa.Domain.Platform.Entities;
 
 namespace Servexa.Infrastructure.Persistence;
@@ -20,6 +21,11 @@ public class ServexaDbContext(DbContextOptions<ServexaDbContext> options) : DbCo
     public DbSet<PolicySetting> PolicySettings => Set<PolicySetting>();
     public DbSet<NumberSeries> NumberSeries => Set<NumberSeries>();
     public DbSet<FileObject> FileObjects => Set<FileObject>();
+
+    // Customers Module
+    public DbSet<Account> Accounts => Set<Account>();
+    public DbSet<Site> Sites => Set<Site>();
+    public DbSet<SiteAccountRelationship> SiteAccountRelationships => Set<SiteAccountRelationship>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
