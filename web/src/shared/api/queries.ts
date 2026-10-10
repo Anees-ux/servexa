@@ -14,6 +14,17 @@ import type {
   SiteDto,
   TransitionWorkOrderStatusRequest,
   WorkOrderDto,
+  BookingDto,
+  CreateBookingRequest,
+  RescheduleBookingRequest,
+  CancelBookingRequest,
+  AssignResourceRequest,
+  ResourceDto,
+  ResourceScheduleDto,
+  AssignedJobDto,
+  ExecutionSessionDto,
+  PauseWorkRequest,
+  CompleteExecutionRequest,
 } from './types';
 
 // Query Keys
@@ -54,6 +65,28 @@ export const workOrderKeys = {
   list: (params: { serviceAccountId?: string; primarySiteId?: string; operationalStatus?: number; priority?: number; search?: string; pageNumber?: number; pageSize?: number }) =>
     [...workOrderKeys.lists(), params] as const,
   detail: (id: string) => [...workOrderKeys.all, 'detail', id] as const,
+};
+
+export const bookingKeys = {
+  all: ['bookings'] as const,
+  lists: () => [...bookingKeys.all, 'list'] as const,
+  list: (params: { workOrderId?: string; siteId?: string; status?: number; dispatchStatus?: number; fromUtc?: string; toUtc?: string; pageNumber?: number; pageSize?: number }) =>
+    [...bookingKeys.lists(), params] as const,
+  detail: (id: string) => [...bookingKeys.all, 'detail', id] as const,
+};
+
+export const resourceKeys = {
+  all: ['resources'] as const,
+  lists: () => [...resourceKeys.all, 'list'] as const,
+  list: (params: { status?: number; resourceType?: number; branchId?: string; pageNumber?: number; pageSize?: number }) =>
+    [...resourceKeys.lists(), params] as const,
+  schedule: (id: string, startUtc: string, endUtc: string) =>
+    [...resourceKeys.all, 'schedule', id, startUtc, endUtc] as const,
+};
+
+export const fieldKeys = {
+  all: ['field'] as const,
+  myJobs: (assignmentStatus?: number) => [...fieldKeys.all, 'my-jobs', assignmentStatus] as const,
 };
 
 // Customer Accounts
@@ -208,6 +241,209 @@ export function useTransitionWorkOrderStatusMutation() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: workOrderKeys.all });
       queryClient.invalidateQueries({ queryKey: workOrderKeys.detail(data.id) });
+    },
+  });
+}
+
+// Scheduling & Bookings Queries & Mutations
+export function useBookingsQuery(
+  workOrderId?: string,
+  siteId?: string,
+  status?: number,
+  dispatchStatus?: number,
+  fromUtc?: string,
+  toUtc?: string,
+  pageNumber = 1,
+  pageSize = 20
+) {
+  return useQuery<PagedResult<BookingDto>, Error>({
+    queryKey: bookingKeys.list({ workOrderId, siteId, status, dispatchStatus, fromUtc, toUtc, pageNumber, pageSize }),
+    queryFn: () => api.getBookings(workOrderId, siteId, status, dispatchStatus, fromUtc, toUtc, pageNumber, pageSize),
+  });
+}
+
+export function useBookingByIdQuery(id?: string) {
+  return useQuery<BookingDto, Error>({
+    queryKey: id ? bookingKeys.detail(id) : ['bookings', 'detail', 'none'],
+    queryFn: () => api.getBookingById(id!),
+    enabled: Boolean(id),
+  });
+}
+
+export function useCreateBookingMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<BookingDto, Error, CreateBookingRequest>({
+    mutationFn: (request: CreateBookingRequest) => api.createBooking(request),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: bookingKeys.all });
+      queryClient.invalidateQueries({ queryKey: workOrderKeys.all });
+    },
+  });
+}
+
+export function useRescheduleBookingMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<BookingDto, Error, { id: string; request: RescheduleBookingRequest }>({
+    mutationFn: ({ id, request }) => api.rescheduleBooking(id, request),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: bookingKeys.all });
+      queryClient.invalidateQueries({ queryKey: bookingKeys.detail(data.id) });
+    },
+  });
+}
+
+export function useCancelBookingMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<BookingDto, Error, { id: string; request: CancelBookingRequest }>({
+    mutationFn: ({ id, request }) => api.cancelBooking(id, request),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: bookingKeys.all });
+      queryClient.invalidateQueries({ queryKey: bookingKeys.detail(data.id) });
+      queryClient.invalidateQueries({ queryKey: workOrderKeys.all });
+    },
+  });
+}
+
+export function useAssignResourceMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<BookingDto, Error, { id: string; request: AssignResourceRequest }>({
+    mutationFn: ({ id, request }) => api.assignResource(id, request),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: bookingKeys.all });
+      queryClient.invalidateQueries({ queryKey: bookingKeys.detail(data.id) });
+      queryClient.invalidateQueries({ queryKey: resourceKeys.all });
+    },
+  });
+}
+
+export function useUnassignResourceMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<BookingDto, Error, { id: string; assignmentId: string; reason: string }>({
+    mutationFn: ({ id, assignmentId, reason }) => api.unassignResource(id, assignmentId, reason),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: bookingKeys.all });
+      queryClient.invalidateQueries({ queryKey: bookingKeys.detail(data.id) });
+      queryClient.invalidateQueries({ queryKey: resourceKeys.all });
+    },
+  });
+}
+
+export function useDispatchBookingMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<BookingDto, Error, string>({
+    mutationFn: (id: string) => api.dispatchBooking(id),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: bookingKeys.all });
+      queryClient.invalidateQueries({ queryKey: bookingKeys.detail(data.id) });
+      queryClient.invalidateQueries({ queryKey: fieldKeys.all });
+    },
+  });
+}
+
+// Resources Queries
+export function useResourcesQuery(
+  status?: number,
+  resourceType?: number,
+  branchId?: string,
+  pageNumber = 1,
+  pageSize = 50
+) {
+  return useQuery<PagedResult<ResourceDto>, Error>({
+    queryKey: resourceKeys.list({ status, resourceType, branchId, pageNumber, pageSize }),
+    queryFn: () => api.getResources(status, resourceType, branchId, pageNumber, pageSize),
+  });
+}
+
+export function useResourceScheduleQuery(id?: string, startUtc?: string, endUtc?: string) {
+  return useQuery<ResourceScheduleDto, Error>({
+    queryKey: id && startUtc && endUtc ? resourceKeys.schedule(id, startUtc, endUtc) : ['resources', 'schedule', 'none'],
+    queryFn: () => api.getResourceSchedule(id!, startUtc!, endUtc!),
+    enabled: Boolean(id && startUtc && endUtc),
+  });
+}
+
+// Field Execution Queries & Mutations
+export function useMyAssignedJobsQuery(assignmentStatus?: number) {
+  return useQuery<AssignedJobDto[], Error>({
+    queryKey: fieldKeys.myJobs(assignmentStatus),
+    queryFn: () => api.getMyAssignedJobs(assignmentStatus),
+  });
+}
+
+export function useStartTravelMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<ExecutionSessionDto, Error, string>({
+    mutationFn: (assignmentId: string) => api.startTechnicianTravel(assignmentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: fieldKeys.all });
+      queryClient.invalidateQueries({ queryKey: bookingKeys.all });
+    },
+  });
+}
+
+export function useMarkArrivedMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<ExecutionSessionDto, Error, string>({
+    mutationFn: (assignmentId: string) => api.markTechnicianArrived(assignmentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: fieldKeys.all });
+      queryClient.invalidateQueries({ queryKey: bookingKeys.all });
+    },
+  });
+}
+
+export function useStartWorkMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<ExecutionSessionDto, Error, string>({
+    mutationFn: (assignmentId: string) => api.startTechnicianWork(assignmentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: fieldKeys.all });
+      queryClient.invalidateQueries({ queryKey: bookingKeys.all });
+      queryClient.invalidateQueries({ queryKey: workOrderKeys.all });
+    },
+  });
+}
+
+export function usePauseWorkMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<ExecutionSessionDto, Error, { assignmentId: string; request: PauseWorkRequest }>({
+    mutationFn: ({ assignmentId, request }) => api.pauseTechnicianWork(assignmentId, request),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: fieldKeys.all });
+    },
+  });
+}
+
+export function useResumeWorkMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<ExecutionSessionDto, Error, string>({
+    mutationFn: (assignmentId: string) => api.resumeTechnicianWork(assignmentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: fieldKeys.all });
+    },
+  });
+}
+
+export function useCompleteExecutionMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<ExecutionSessionDto, Error, { assignmentId: string; request: CompleteExecutionRequest }>({
+    mutationFn: ({ assignmentId, request }) => api.completeTechnicianExecution(assignmentId, request),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: fieldKeys.all });
+      queryClient.invalidateQueries({ queryKey: bookingKeys.all });
+      queryClient.invalidateQueries({ queryKey: workOrderKeys.all });
     },
   });
 }

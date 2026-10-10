@@ -7,12 +7,12 @@ export interface SelectOption {
 
 export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
-  options: SelectOption[];
+  options?: SelectOption[];
   error?: string;
 }
 
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, options, error, id, style, ...props }, ref) => {
+  ({ label, options, error, id, style, children, ...props }, ref) => {
     const selectId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
     const errorId = selectId ? `${selectId}-error` : undefined;
 
@@ -50,11 +50,13 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           }}
           {...props}
         >
-          {options.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
+          {options
+            ? options.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))
+            : children}
         </select>
         {error && (
           <span id={errorId} role="alert" style={{ fontSize: '12px', color: 'var(--danger)' }}>

@@ -50,6 +50,10 @@ public static class DependencyInjection
         services.AddScoped<Application.Assets.Repositories.IEquipmentModelRepository, EquipmentModelRepository>();
         services.AddScoped<Application.Assets.Repositories.IAssetRepository, AssetRepository>();
         services.AddScoped<Application.Service.Repositories.IWorkOrderRepository, WorkOrderRepository>();
+        services.AddScoped<Application.Scheduling.Repositories.IBookingRepository, BookingRepository>();
+        services.AddScoped<Application.Scheduling.Repositories.IResourceRepository, ResourceRepository>();
+        services.AddScoped<Application.Scheduling.Repositories.IResourceCommitmentRepository, ResourceCommitmentRepository>();
+        services.AddScoped<Application.Field.Repositories.IExecutionSessionRepository, ExecutionSessionRepository>();
 
         return services;
     }

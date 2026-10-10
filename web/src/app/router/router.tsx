@@ -9,7 +9,9 @@ import { AccountsView } from '../../features/customers/AccountsView';
 import { SitesView } from '../../features/sites/SitesView';
 import { AssetsView } from '../../features/assets/AssetsView';
 import { WorkOrdersView } from '../../features/work-orders/WorkOrdersView';
+import { SchedulingView } from '../../features/scheduling/SchedulingView';
 import { DispatchView } from '../../features/dispatch/DispatchView';
+import { TechnicianView } from '../../features/technician/TechnicianView';
 
 const rootRoute = createRootRoute({
   component: Shell,
@@ -45,10 +47,22 @@ const workOrdersRoute = createRoute({
   component: WorkOrdersView,
 });
 
+const schedulingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/scheduling',
+  component: SchedulingView,
+});
+
 const dispatchRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/dispatch',
   component: DispatchView,
+});
+
+const technicianRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/technician',
+  component: TechnicianView,
 });
 
 const routeTree = rootRoute.addChildren([
@@ -57,7 +71,9 @@ const routeTree = rootRoute.addChildren([
   sitesRoute,
   assetsRoute,
   workOrdersRoute,
+  schedulingRoute,
   dispatchRoute,
+  technicianRoute,
 ]);
 
 export const router = createRouter({

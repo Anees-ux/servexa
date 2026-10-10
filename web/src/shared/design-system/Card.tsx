@@ -7,6 +7,7 @@ interface CardProps {
   children: React.ReactNode;
   noPadding?: boolean;
   style?: React.CSSProperties;
+  className?: string;
 }
 
 export const Card: React.FC<CardProps> = ({
@@ -16,9 +17,11 @@ export const Card: React.FC<CardProps> = ({
   children,
   noPadding,
   style,
+  className,
 }) => {
   return (
     <div
+      className={className}
       style={{
         backgroundColor: 'var(--bg-surface)',
         border: '1px solid var(--border-subtle)',

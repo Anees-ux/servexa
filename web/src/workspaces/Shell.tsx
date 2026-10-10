@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Activity,
   AlertCircle,
   Boxes,
   Building2,
@@ -9,9 +8,11 @@ import {
   Layers,
   MapPin,
   RefreshCw,
+  Send,
   ShieldAlert,
   ShieldCheck,
   User,
+  Wrench,
 } from 'lucide-react';
 import { Link, Outlet, useRouterState } from '@tanstack/react-router';
 import { useAuth } from '../app/auth/AuthContext';
@@ -242,9 +243,14 @@ export const Shell: React.FC = () => {
             <span>Work Orders</span>
           </Link>
 
-          <Link to="/dispatch" style={getNavLinkStyle(isNavActive('/dispatch'))}>
+          <Link to="/scheduling" style={getNavLinkStyle(isNavActive('/scheduling'))}>
             <Calendar size={17} />
-            <span>Dispatch & Scheduling</span>
+            <span>Scheduling</span>
+          </Link>
+
+          <Link to="/dispatch" style={getNavLinkStyle(isNavActive('/dispatch'))}>
+            <Send size={17} />
+            <span>Dispatch Board</span>
           </Link>
 
           <div
@@ -258,22 +264,13 @@ export const Shell: React.FC = () => {
               letterSpacing: '0.08em',
             }}
           >
-            Next Verticals
+            Field Mobility
           </div>
 
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '8px 12px',
-              fontSize: '13px',
-              color: 'var(--text-muted)',
-            }}
-          >
-            <Activity size={16} />
+          <Link to="/technician" style={getNavLinkStyle(isNavActive('/technician'))}>
+            <Wrench size={17} />
             <span>Field Execution</span>
-          </div>
+          </Link>
         </aside>
 
         {/* Content View routed by TanStack Router */}

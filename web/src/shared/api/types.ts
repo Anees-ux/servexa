@@ -1,44 +1,24 @@
-export interface AccountDto {
-  id: string;
-  tenantId: string;
-  accountNumber: string;
-  legalName: string;
-  displayName: string;
-  accountType: string;
-  status: string;
-  defaultBranchId?: string | null;
-  paymentTermsDays?: number | null;
-  currencyCode: string;
-  isCreditHold: boolean;
-  creditHoldReason?: string | null;
-  createdAtUtc: string;
-  modifiedAtUtc: string;
+/**
+ * API Transport Contracts
+ * Source of truth: OpenAPI-generated schemas from Servexa.Api
+ */
+import type { components, paths } from './generated';
+
+export type { paths };
+export type Schemas = components['schemas'];
+
+// Generic PagedResult wrapper
+export interface PagedResult<T> {
+  items: T[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+  totalPages?: number;
+  hasNextPage?: boolean;
+  hasPreviousPage?: boolean;
 }
 
-export interface SiteDto {
-  id: string;
-  tenantId: string;
-  siteNumber: string;
-  name: string;
-  branchId: string;
-  territoryId?: string | null;
-  timeZoneId: string;
-  addressLine1: string;
-  addressLine2?: string | null;
-  city: string;
-  stateProvince: string;
-  postalCode: string;
-  countryCode: string;
-  latitude?: number | null;
-  longitude?: number | null;
-  status: string;
-  accessNotes?: string | null;
-  hazardNotes?: string | null;
-  createdAtUtc: string;
-  modifiedAtUtc: string;
-  primaryAccountId?: string | null;
-}
-
+// Auth types (frontend session & development tokens)
 export interface AuthResponseDto {
   accessToken: string;
   tokenType: string;
@@ -61,191 +41,53 @@ export interface CurrentUserDto {
   isAuthenticated: boolean;
 }
 
-export interface PagedResult<T> {
-  items: T[];
-  totalCount: number;
-  pageNumber: number;
-  pageSize: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
-}
+// Accounts
+export type AccountDto = Schemas['AccountDto'];
+export type CreateAccountRequest = Schemas['CreateAccountCommand'];
 
-export interface CreateAccountRequest {
-  accountNumber: string;
-  legalName: string;
-  displayName: string;
-  accountType?: number;
-  defaultBranchId?: string | null;
-  paymentTermsDays?: number;
-  currencyCode?: string;
-}
+// Sites
+export type SiteDto = Schemas['SiteDto'];
+export type CreateSiteRequest = Schemas['CreateSiteCommand'];
 
-export interface CreateSiteRequest {
-  siteNumber: string;
-  name: string;
-  branchId: string;
-  timeZoneId: string;
-  addressLine1: string;
-  city: string;
-  stateProvince: string;
-  postalCode: string;
-  countryCode?: string;
-  addressLine2?: string | null;
-  territoryId?: string | null;
-  accessNotes?: string | null;
-  hazardNotes?: string | null;
-  primaryAccountId?: string | null;
-}
+// Equipment Models
+export type EquipmentModelDto = Schemas['EquipmentModelDto'];
+export type CreateEquipmentModelRequest = Schemas['CreateEquipmentModelCommand'];
 
-// Equipment Model Types
-export interface EquipmentModelDto {
-  id: string;
-  tenantId: string;
-  manufacturerName: string;
-  modelCode: string;
-  displayName: string;
-  categoryCode: string;
-  trackingPolicy: string;
-  trackingPolicyValue: number;
-  status: string;
-  statusValue: number;
-  createdAtUtc: string;
-  modifiedAtUtc: string;
-}
+// Assets
+export type AssetDto = Schemas['AssetDto'];
+export type AssetLifecycleEventDto = Schemas['AssetLifecycleEventDto'];
+export type CreateAssetRequest = Schemas['CreateAssetCommand'];
+export type ChangeAssetStatusRequest = Schemas['ChangeAssetStatusRequest'];
 
-export interface CreateEquipmentModelRequest {
-  manufacturerName: string;
-  modelCode: string;
-  displayName: string;
-  categoryCode: string;
-  trackingPolicy: number;
-}
-
-// Asset Registry Types
-export interface AssetLifecycleEventDto {
-  id: string;
-  eventType: string;
-  eventTypeValue: number;
-  previousStatus?: string | null;
-  previousStatusValue?: number | null;
-  newStatus?: string | null;
-  newStatusValue?: number | null;
-  fromSiteId?: string | null;
-  toSiteId?: string | null;
-  fromOwnerAccountId?: string | null;
-  toOwnerAccountId?: string | null;
-  reason?: string | null;
-  actorUserId?: string | null;
-  occurredAtUtc: string;
-  recordedAtUtc: string;
-}
-
-export interface AssetDto {
-  id: string;
-  tenantId: string;
-  assetNumber: string;
-  equipmentModelId: string;
-  equipmentModelName?: string | null;
-  manufacturerName?: string | null;
-  modelCode?: string | null;
-  serialNumber?: string | null;
-  currentSiteId?: string | null;
-  currentSiteName?: string | null;
-  currentOwnerAccountId?: string | null;
-  currentOwnerAccountName?: string | null;
-  status: string;
-  statusValue: number;
-  installedAtUtc?: string | null;
-  decommissionedAtUtc?: string | null;
-  createdAtUtc: string;
-  modifiedAtUtc: string;
-  lifecycleEvents?: AssetLifecycleEventDto[];
-}
-
-export interface CreateAssetRequest {
-  assetNumber?: string | null;
-  equipmentModelId: string;
-  serialNumber?: string | null;
-  currentSiteId?: string | null;
-  currentOwnerAccountId?: string | null;
-  status?: number;
-}
-
-export interface ChangeAssetStatusRequest {
-  targetStatus: number;
-  reason?: string | null;
-  siteId?: string | null;
-}
-
-// Work Order Types
-export interface WorkOrderAssetDto {
-  id: string;
-  assetId: string;
-  assetNumber?: string | null;
-  modelDisplayName?: string | null;
-  role: string;
-  roleValue: number;
-  siteIdAtTime: string;
-  status: string;
-  statusValue: number;
-}
-
-export interface WorkOrderStatusHistoryDto {
-  id: string;
-  fromStatus: string;
-  fromStatusValue: number;
-  toStatus: string;
-  toStatusValue: number;
-  pauseReasonCode?: string | null;
-  changedByUserId?: string | null;
-  changedAtUtc: string;
-  reason?: string | null;
-}
-
-export interface WorkOrderDto {
-  id: string;
-  tenantId: string;
-  workOrderNumber: string;
-  serviceRequestId?: string | null;
-  serviceAccountId: string;
-  serviceAccountName?: string | null;
-  billToAccountId: string;
-  billToAccountName?: string | null;
-  primarySiteId: string;
-  primarySiteName?: string | null;
-  workTypeCode: string;
-  priority: string;
-  priorityValue: number;
-  operationalStatus: string;
-  operationalStatusValue: number;
-  summary: string;
-  description?: string | null;
-  pauseReasonCode?: string | null;
-  pauseNote?: string | null;
-  operationallyCompletedAtUtc?: string | null;
-  createdAtUtc: string;
-  modifiedAtUtc: string;
-  assets: WorkOrderAssetDto[];
-  statusHistory: WorkOrderStatusHistoryDto[];
-}
-
-export interface CreateWorkOrderRequest {
+// Work Orders
+export type WorkOrderDto = Schemas['WorkOrderDto'];
+export type WorkOrderAssetDto = Schemas['WorkOrderAssetDto'];
+export type WorkOrderStatusHistoryDto = Schemas['WorkOrderStatusHistoryDto'];
+export type CreateWorkOrderRequest = Omit<Schemas['CreateWorkOrderCommand'], 'workOrderNumber' | 'serviceRequestId' | 'billToAccountId'> & {
   workOrderNumber?: string | null;
   serviceRequestId?: string | null;
-  serviceAccountId: string;
   billToAccountId?: string | null;
-  primarySiteId: string;
-  workTypeCode: string;
-  priority: number;
-  summary: string;
-  description?: string | null;
-  primaryAssetId?: string | null;
-}
+};
+export type TransitionWorkOrderStatusRequest = Schemas['TransitionWorkOrderStatusRequest'];
 
-export interface TransitionWorkOrderStatusRequest {
-  targetStatus: number;
-  pauseReasonCode?: string | null;
-  pauseNote?: string | null;
-  reason?: string | null;
-}
+// Scheduling & Bookings
+export type BookingDto = Schemas['BookingDto'];
+export type ResourceAssignmentDto = Schemas['ResourceAssignmentDto'];
+export type BookingScheduleRevisionDto = Schemas['BookingScheduleRevisionDto'];
+export type BookingStatusHistoryDto = Schemas['BookingStatusHistoryDto'];
+export type CreateBookingRequest = Schemas['CreateBookingCommand'];
+export type RescheduleBookingRequest = Schemas['RescheduleBookingRequest'];
+export type CancelBookingRequest = Schemas['CancelBookingRequest'];
+export type AssignResourceRequest = Schemas['AssignResourceRequest'];
+
+// Resources
+export type ResourceDto = Schemas['ResourceDto'];
+export type ResourceScheduleDto = Schemas['ResourceScheduleDto'];
+export type ResourceCommitmentDto = Schemas['ResourceCommitmentDto'];
+
+// Field Execution & Technician Work Queue
+export type AssignedJobDto = Schemas['AssignedJobDto'];
+export type ExecutionSessionDto = Schemas['ExecutionSessionDto'];
+export type ExecutionIntervalDto = Schemas['ExecutionIntervalDto'];
+export type PauseWorkRequest = Schemas['PauseWorkRequest'];
+export type CompleteExecutionRequest = Schemas['CompleteExecutionRequest'];

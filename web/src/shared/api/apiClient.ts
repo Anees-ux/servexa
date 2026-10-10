@@ -14,6 +14,17 @@ import type {
   SiteDto,
   TransitionWorkOrderStatusRequest,
   WorkOrderDto,
+  BookingDto,
+  CreateBookingRequest,
+  RescheduleBookingRequest,
+  CancelBookingRequest,
+  AssignResourceRequest,
+  ResourceDto,
+  ResourceScheduleDto,
+  AssignedJobDto,
+  ExecutionSessionDto,
+  PauseWorkRequest,
+  CompleteExecutionRequest,
 } from './types';
 
 export interface ProblemDetailsResponse {
@@ -250,6 +261,146 @@ class ApiClient {
 
   public async transitionWorkOrderStatus(id: string, req: TransitionWorkOrderStatusRequest): Promise<WorkOrderDto> {
     return this.request<WorkOrderDto>(`/work-orders/${id}/transition`, {
+      method: 'POST',
+      body: JSON.stringify(req),
+    });
+  }
+
+  // Scheduling API
+  public async getBookings(
+    workOrderId?: string,
+    siteId?: string,
+    status?: number,
+    dispatchStatus?: number,
+    fromUtc?: string,
+    toUtc?: string,
+    pageNumber = 1,
+    pageSize = 20
+  ): Promise<PagedResult<BookingDto>> {
+    const params = new URLSearchParams();
+    if (workOrderId) params.set('workOrderId', workOrderId);
+    if (siteId) params.set('siteId', siteId);
+    if (status !== undefined && status !== null) params.set('status', status.toString());
+    if (dispatchStatus !== undefined && dispatchStatus !== null) params.set('dispatchStatus', dispatchStatus.toString());
+    if (fromUtc) params.set('fromUtc', fromUtc);
+    if (toUtc) params.set('toUtc', toUtc);
+    params.set('pageNumber', pageNumber.toString());
+    params.set('pageSize', pageSize.toString());
+
+    return this.request<PagedResult<BookingDto>>(`/bookings?${params.toString()}`);
+  }
+
+  public async getBookingById(id: string): Promise<BookingDto> {
+    return this.request<BookingDto>(`/bookings/${id}`);
+  }
+
+  public async createBooking(req: CreateBookingRequest): Promise<BookingDto> {
+    return this.request<BookingDto>('/bookings', {
+      method: 'POST',
+      body: JSON.stringify(req),
+    });
+  }
+
+  public async rescheduleBooking(id: string, req: RescheduleBookingRequest): Promise<BookingDto> {
+    return this.request<BookingDto>(`/bookings/${id}/reschedule`, {
+      method: 'POST',
+      body: JSON.stringify(req),
+    });
+  }
+
+  public async cancelBooking(id: string, req: CancelBookingRequest): Promise<BookingDto> {
+    return this.request<BookingDto>(`/bookings/${id}/cancel`, {
+      method: 'POST',
+      body: JSON.stringify(req),
+    });
+  }
+
+  public async assignResource(id: string, req: AssignResourceRequest): Promise<BookingDto> {
+    return this.request<BookingDto>(`/bookings/${id}/assignments`, {
+      method: 'POST',
+      body: JSON.stringify(req),
+    });
+  }
+
+  public async unassignResource(id: string, assignmentId: string, reason: string): Promise<BookingDto> {
+    const params = new URLSearchParams({ reason });
+    return this.request<BookingDto>(`/bookings/${id}/assignments/${assignmentId}?${params.toString()}`, {
+      method: 'DELETE',
+    });
+  }
+
+  public async dispatchBooking(id: string): Promise<BookingDto> {
+    return this.request<BookingDto>(`/bookings/${id}/dispatch`, {
+      method: 'POST',
+    });
+  }
+
+  // Resources API
+  public async getResources(
+    status?: number,
+    resourceType?: number,
+    branchId?: string,
+    pageNumber = 1,
+    pageSize = 50
+  ): Promise<PagedResult<ResourceDto>> {
+    const params = new URLSearchParams();
+    if (status !== undefined && status !== null) params.set('status', status.toString());
+    if (resourceType !== undefined && resourceType !== null) params.set('resourceType', resourceType.toString());
+    if (branchId) params.set('branchId', branchId);
+    params.set('pageNumber', pageNumber.toString());
+    params.set('pageSize', pageSize.toString());
+
+    return this.request<PagedResult<ResourceDto>>(`/resources?${params.toString()}`);
+  }
+
+  public async getResourceSchedule(id: string, startUtc: string, endUtc: string): Promise<ResourceScheduleDto> {
+    const params = new URLSearchParams({ startUtc, endUtc });
+    return this.request<ResourceScheduleDto>(`/resources/${id}/schedule?${params.toString()}`);
+  }
+
+  // Field Execution API
+  public async getMyAssignedJobs(assignmentStatus?: number): Promise<AssignedJobDto[]> {
+    const params = new URLSearchParams();
+    if (assignmentStatus !== undefined && assignmentStatus !== null) {
+      params.set('assignmentStatus', assignmentStatus.toString());
+    }
+    const q = params.toString() ? `?${params.toString()}` : '';
+    return this.request<AssignedJobDto[]>(`/field/me/assignments${q}`);
+  }
+
+  public async startTechnicianTravel(assignmentId: string): Promise<ExecutionSessionDto> {
+    return this.request<ExecutionSessionDto>(`/field/assignments/${assignmentId}/travel`, {
+      method: 'POST',
+    });
+  }
+
+  public async markTechnicianArrived(assignmentId: string): Promise<ExecutionSessionDto> {
+    return this.request<ExecutionSessionDto>(`/field/assignments/${assignmentId}/arrive`, {
+      method: 'POST',
+    });
+  }
+
+  public async startTechnicianWork(assignmentId: string): Promise<ExecutionSessionDto> {
+    return this.request<ExecutionSessionDto>(`/field/assignments/${assignmentId}/start`, {
+      method: 'POST',
+    });
+  }
+
+  public async pauseTechnicianWork(assignmentId: string, req: PauseWorkRequest): Promise<ExecutionSessionDto> {
+    return this.request<ExecutionSessionDto>(`/field/assignments/${assignmentId}/pause`, {
+      method: 'POST',
+      body: JSON.stringify(req),
+    });
+  }
+
+  public async resumeTechnicianWork(assignmentId: string): Promise<ExecutionSessionDto> {
+    return this.request<ExecutionSessionDto>(`/field/assignments/${assignmentId}/resume`, {
+      method: 'POST',
+    });
+  }
+
+  public async completeTechnicianExecution(assignmentId: string, req: CompleteExecutionRequest): Promise<ExecutionSessionDto> {
+    return this.request<ExecutionSessionDto>(`/field/assignments/${assignmentId}/complete`, {
       method: 'POST',
       body: JSON.stringify(req),
     });

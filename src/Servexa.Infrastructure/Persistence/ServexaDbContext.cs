@@ -37,6 +37,20 @@ public class ServexaDbContext(DbContextOptions<ServexaDbContext> options) : DbCo
     public DbSet<Domain.Service.Entities.WorkOrderAsset> WorkOrderAssets => Set<Domain.Service.Entities.WorkOrderAsset>();
     public DbSet<Domain.Service.Entities.WorkOrderStatusHistory> WorkOrderStatusHistories => Set<Domain.Service.Entities.WorkOrderStatusHistory>();
 
+    // Scheduling Module
+    public DbSet<Domain.Scheduling.Entities.Resource> Resources => Set<Domain.Scheduling.Entities.Resource>();
+    public DbSet<Domain.Scheduling.Entities.ResourceScheduleGuard> ResourceScheduleGuards => Set<Domain.Scheduling.Entities.ResourceScheduleGuard>();
+    public DbSet<Domain.Scheduling.Entities.ResourceCommitment> ResourceCommitments => Set<Domain.Scheduling.Entities.ResourceCommitment>();
+    public DbSet<Domain.Scheduling.Entities.ResourceAssignment> ResourceAssignments => Set<Domain.Scheduling.Entities.ResourceAssignment>();
+    public DbSet<Domain.Scheduling.Entities.Booking> Bookings => Set<Domain.Scheduling.Entities.Booking>();
+    public DbSet<Domain.Scheduling.Entities.BookingScheduleRevision> BookingScheduleRevisions => Set<Domain.Scheduling.Entities.BookingScheduleRevision>();
+    public DbSet<Domain.Scheduling.Entities.BookingStatusHistory> BookingStatusHistories => Set<Domain.Scheduling.Entities.BookingStatusHistory>();
+    public DbSet<Domain.Scheduling.Entities.SchedulingConflictLog> SchedulingConflictLogs => Set<Domain.Scheduling.Entities.SchedulingConflictLog>();
+
+    // Field Execution Module
+    public DbSet<Domain.Field.Entities.ExecutionSession> ExecutionSessions => Set<Domain.Field.Entities.ExecutionSession>();
+    public DbSet<Domain.Field.Entities.ExecutionInterval> ExecutionIntervals => Set<Domain.Field.Entities.ExecutionInterval>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

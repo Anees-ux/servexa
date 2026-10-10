@@ -30,6 +30,10 @@ public static class Capabilities
     public const string BookingView = "Booking.View";
     public const string BookingCreate = "Booking.Create";
     public const string BookingAssign = "Booking.Assign";
+    public const string BookingDispatch = "Booking.Dispatch";
+    public const string TechnicianExecute = "Technician.Execute";
+    public const string ResourceView = "Resource.View";
+    public const string ResourceManage = "Resource.Manage";
 
     // Billing & Commercial Capabilities
     public const string InvoiceView = "Invoice.View";

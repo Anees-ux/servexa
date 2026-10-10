@@ -51,6 +51,10 @@ public sealed class DevDataSeeder(ServexaDbContext dbContext) : IDevDataSeeder
             Capabilities.BookingView,
             Capabilities.BookingCreate,
             Capabilities.BookingAssign,
+            Capabilities.BookingDispatch,
+            Capabilities.TechnicianExecute,
+            Capabilities.ResourceView,
+            Capabilities.ResourceManage,
             Capabilities.InvoiceView,
             Capabilities.InvoicePost
         };
@@ -105,6 +109,7 @@ public sealed class DevDataSeeder(ServexaDbContext dbContext) : IDevDataSeeder
         // 6. Ensure RoleAssignment exists for Admin
         var assignment = await dbContext.RoleAssignments.FirstOrDefaultAsync(
             ra => ra.TenantId == DevTenantId && ra.UserId == DevAdminUserId && ra.RoleId == adminRole.Id, cancellationToken);
+
         if (assignment == null)
         {
             assignment = new RoleAssignment(
@@ -113,6 +118,22 @@ public sealed class DevDataSeeder(ServexaDbContext dbContext) : IDevDataSeeder
                 roleId: adminRole.Id,
                 effectiveFromUtc: DateTime.UtcNow.AddYears(-1));
             await dbContext.RoleAssignments.AddAsync(assignment, cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+        // 7. Ensure Dev Resource exists for Admin
+        var devResource = await dbContext.Resources.FirstOrDefaultAsync(
+            r => r.TenantId == DevTenantId && r.UserId == DevAdminUserId, cancellationToken);
+        if (devResource == null)
+        {
+            devResource = new Domain.Scheduling.Entities.Resource(
+                tenantId: DevTenantId,
+                resourceCode: "TECH-001",
+                displayName: "Acme Lead Technician (Admin)",
+                resourceType: Domain.Scheduling.Enums.ResourceType.Technician,
+                userId: DevAdminUserId,
+                homeBranchId: DevBranchId);
+            await dbContext.Resources.AddAsync(devResource, cancellationToken);
             await dbContext.SaveChangesAsync(cancellationToken);
         }
     }
