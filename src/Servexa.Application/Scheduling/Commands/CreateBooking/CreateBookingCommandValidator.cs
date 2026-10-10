@@ -21,7 +21,7 @@ public sealed class CreateBookingCommandValidator : AbstractValidator<CreateBook
             .WithMessage("Planned end time must be after planned start time.");
 
         RuleFor(x => x.SchedulingNotes)
-            .MaximumLength(2000)
-            .WithMessage("Scheduling notes must not exceed 2000 characters.");
+            .MaximumLength(1000)
+            .WithMessage("Scheduling notes must not exceed 1000 characters.");
     }
 }

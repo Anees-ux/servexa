@@ -62,8 +62,7 @@ public sealed class TransitionWorkOrderStatusCommandHandler(
                 break;
 
             case WorkOrderOperationalStatus.OperationallyComplete:
-                workOrder.Complete(userId);
-                break;
+                throw new ValidationException("Direct transition to OperationallyComplete is not permitted. Operational completion must be executed through the authorized completion evaluation workflow.");
 
             case WorkOrderOperationalStatus.Cancelled:
                 if (string.IsNullOrWhiteSpace(request.Reason))

@@ -24,7 +24,9 @@ public sealed record WorkOrderDto(
     DateTime CreatedAtUtc,
     DateTime ModifiedAtUtc,
     IReadOnlyList<WorkOrderAssetDto> Assets,
-    IReadOnlyList<WorkOrderStatusHistoryDto> StatusHistory);
+    IReadOnlyList<WorkOrderStatusHistoryDto> StatusHistory,
+    IReadOnlyList<WorkOrderScopeItemDto>? ScopeItems = null,
+    WorkOrderCompletionEvaluationDto? LatestEvaluation = null);
 
 public sealed record WorkOrderAssetDto(
     Guid Id,

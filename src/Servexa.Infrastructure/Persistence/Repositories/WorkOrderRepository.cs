@@ -11,6 +11,8 @@ public sealed class WorkOrderRepository(ServexaDbContext dbContext) : IWorkOrder
         var query = dbContext.WorkOrders
             .Include(w => w.Assets)
             .Include(w => w.StatusHistory)
+            .Include(w => w.ScopeItems)
+            .Include(w => w.CompletionEvaluations)
             .Where(w => w.TenantId == tenantId && w.Id == id);
 
         if (asNoTracking)
@@ -28,6 +30,8 @@ public sealed class WorkOrderRepository(ServexaDbContext dbContext) : IWorkOrder
             .AsNoTracking()
             .Include(w => w.Assets)
             .Include(w => w.StatusHistory)
+            .Include(w => w.ScopeItems)
+            .Include(w => w.CompletionEvaluations)
             .FirstOrDefaultAsync(w => w.TenantId == tenantId && w.WorkOrderNumber == norm, cancellationToken);
     }
 
@@ -46,6 +50,8 @@ public sealed class WorkOrderRepository(ServexaDbContext dbContext) : IWorkOrder
             .AsNoTracking()
             .Include(w => w.Assets)
             .Include(w => w.StatusHistory)
+            .Include(w => w.ScopeItems)
+            .Include(w => w.CompletionEvaluations)
             .Where(w => w.TenantId == tenantId);
 
         if (serviceAccountId.HasValue)
@@ -135,5 +141,39 @@ public sealed class WorkOrderRepository(ServexaDbContext dbContext) : IWorkOrder
         var norm = workOrderNumber.Trim().ToUpperInvariant();
         return await dbContext.WorkOrders
             .AnyAsync(w => w.TenantId == tenantId && w.WorkOrderNumber == norm, cancellationToken);
+    }
+
+    public async Task<WorkOrderScopeItem?> GetScopeItemByIdAsync(Guid tenantId, Guid workOrderId, Guid scopeItemId, CancellationToken cancellationToken = default)
+    {
+        return await dbContext.WorkOrderScopeItems
+            .FirstOrDefaultAsync(s => s.TenantId == tenantId && s.WorkOrderId == workOrderId && s.Id == scopeItemId, cancellationToken);
+    }
+
+    public async Task AddScopeItemAsync(WorkOrderScopeItem scopeItem, CancellationToken cancellationToken = default)
+    {
+        await dbContext.WorkOrderScopeItems.AddAsync(scopeItem, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<WorkOrderCompletionEvaluation>> GetCompletionEvaluationsAsync(Guid tenantId, Guid workOrderId, CancellationToken cancellationToken = default)
+    {
+        return await dbContext.WorkOrderCompletionEvaluations
+            .AsNoTracking()
+            .Where(e => e.TenantId == tenantId && e.WorkOrderId == workOrderId)
+            .OrderByDescending(e => e.EvaluatedAtUtc)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<WorkOrderCompletionEvaluation?> GetLatestCompletionEvaluationAsync(Guid tenantId, Guid workOrderId, CancellationToken cancellationToken = default)
+    {
+        return await dbContext.WorkOrderCompletionEvaluations
+            .AsNoTracking()
+            .Where(e => e.TenantId == tenantId && e.WorkOrderId == workOrderId)
+            .OrderByDescending(e => e.EvaluatedAtUtc)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task AddCompletionEvaluationAsync(WorkOrderCompletionEvaluation evaluation, CancellationToken cancellationToken = default)
+    {
+        await dbContext.WorkOrderCompletionEvaluations.AddAsync(evaluation, cancellationToken);
     }
 }

@@ -13,7 +13,7 @@ public sealed class CompleteTechnicianExecutionCommandValidator : AbstractValida
         RuleFor(x => x.WorkSummary)
             .NotEmpty()
             .WithMessage("Work summary is required upon completion.")
-            .MaximumLength(4000)
-            .WithMessage("Work summary must not exceed 4000 characters.");
+            .MaximumLength(2000)
+            .WithMessage("Work summary must not exceed 2000 characters.");
     }
 }

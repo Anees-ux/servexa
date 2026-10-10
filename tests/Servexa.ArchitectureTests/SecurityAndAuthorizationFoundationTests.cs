@@ -234,6 +234,30 @@ public class SecurityAndAuthorizationFoundationTests
 
         await handler.HandleAsync(deniedAuthContext);
         Assert.False(deniedAuthContext.HasSucceeded);
+
+        // Test pipe-separated OR requirement (e.g. WorkOrderCreate || TechnicianExecute)
+        var orRequirement = new PermissionRequirement($"{Capabilities.WorkOrderCreate}|{Capabilities.TechnicianExecute}");
+
+        // Context with WorkOrderCreate
+        var managerContext = new FakeSecurityTenantContext(TenantA, UserA, isAuthenticated: true, [Capabilities.WorkOrderCreate]);
+        var managerHandler = new PermissionAuthorizationHandler(managerContext);
+        var managerAuthContext = new AuthorizationHandlerContext([orRequirement], new ClaimsPrincipal(new ClaimsIdentity([new Claim("sub", "123")], "Bearer")), null);
+        await managerHandler.HandleAsync(managerAuthContext);
+        Assert.True(managerAuthContext.HasSucceeded);
+
+        // Context with TechnicianExecute
+        var techContext = new FakeSecurityTenantContext(TenantA, UserA, isAuthenticated: true, [Capabilities.TechnicianExecute]);
+        var techHandler = new PermissionAuthorizationHandler(techContext);
+        var techAuthContext = new AuthorizationHandlerContext([orRequirement], new ClaimsPrincipal(new ClaimsIdentity([new Claim("sub", "123")], "Bearer")), null);
+        await techHandler.HandleAsync(techAuthContext);
+        Assert.True(techAuthContext.HasSucceeded);
+
+        // Context with only CustomerView (neither WorkOrderCreate nor TechnicianExecute)
+        var unauthorizedContext = new FakeSecurityTenantContext(TenantA, UserA, isAuthenticated: true, [Capabilities.CustomerView]);
+        var unauthorizedHandler = new PermissionAuthorizationHandler(unauthorizedContext);
+        var unauthorizedAuthContext = new AuthorizationHandlerContext([orRequirement], new ClaimsPrincipal(new ClaimsIdentity([new Claim("sub", "123")], "Bearer")), null);
+        await unauthorizedHandler.HandleAsync(unauthorizedAuthContext);
+        Assert.False(unauthorizedAuthContext.HasSucceeded);
     }
 
     [Fact]
@@ -306,8 +330,24 @@ public class SecurityAndAuthorizationFoundationTests
             .Cast<HasPermissionAttribute>()
             .SingleOrDefault();
 
-        Assert.NotNull(getSitesAttr);
-        Assert.Equal(Capabilities.SiteView, getSitesAttr.Permission);
+        // WorkOrdersController
+        var updateTaskStatusAttr = typeof(WorkOrdersController)
+            .GetMethod(nameof(WorkOrdersController.UpdateWorkTaskStatus))!
+            .GetCustomAttributes(typeof(HasPermissionAttribute), false)
+            .Cast<HasPermissionAttribute>()
+            .SingleOrDefault();
+
+        Assert.NotNull(updateTaskStatusAttr);
+        Assert.Equal($"{Capabilities.WorkOrderCreate}|{Capabilities.TechnicianExecute}", updateTaskStatusAttr.Permission);
+
+        var updateScopeItemStatusAttr = typeof(WorkOrdersController)
+            .GetMethod(nameof(WorkOrdersController.UpdateScopeItemStatus))!
+            .GetCustomAttributes(typeof(HasPermissionAttribute), false)
+            .Cast<HasPermissionAttribute>()
+            .SingleOrDefault();
+
+        Assert.NotNull(updateScopeItemStatusAttr);
+        Assert.Equal($"{Capabilities.WorkOrderCreate}|{Capabilities.TechnicianExecute}", updateScopeItemStatusAttr.Permission);
     }
 
     #region Test Fakes

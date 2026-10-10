@@ -61,6 +61,19 @@ public sealed class ExecutionSessionRepository(ServexaDbContext dbContext) : IEx
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<ExecutionSession>> GetSessionsForWorkOrderAsync(
+        Guid tenantId,
+        Guid workOrderId,
+        CancellationToken cancellationToken = default)
+    {
+        return await dbContext.ExecutionSessions
+            .AsNoTracking()
+            .Include(s => s.Intervals)
+            .Where(s => s.TenantId == tenantId && s.WorkOrderId == workOrderId)
+            .OrderByDescending(s => s.CreatedAtUtc)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task AddAsync(ExecutionSession session, CancellationToken cancellationToken = default)
     {
         await dbContext.ExecutionSessions.AddAsync(session, cancellationToken);

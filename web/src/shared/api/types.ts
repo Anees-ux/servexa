@@ -69,6 +69,13 @@ export type CreateWorkOrderRequest = Omit<Schemas['CreateWorkOrderCommand'], 'wo
   billToAccountId?: string | null;
 };
 export type TransitionWorkOrderStatusRequest = Schemas['TransitionWorkOrderStatusRequest'];
+export type WorkOrderScopeItemDto = Schemas['WorkOrderScopeItemDto'];
+export type CompletionGateResultDto = Schemas['CompletionGateResultDto'];
+export type WorkOrderCompletionEvaluationDto = Schemas['WorkOrderCompletionEvaluationDto'];
+export type WorkOrderCompletionReadinessDto = Schemas['WorkOrderCompletionReadinessDto'];
+export type CompleteWorkOrderRequest = Schemas['CompleteWorkOrderRequest'];
+export type AddScopeItemRequest = Schemas['AddScopeItemRequest'];
+export type UpdateScopeItemStatusRequest = Schemas['UpdateScopeItemStatusRequest'];
 
 // Scheduling & Bookings
 export type BookingDto = Schemas['BookingDto'];
@@ -91,3 +98,9 @@ export type ExecutionSessionDto = Schemas['ExecutionSessionDto'];
 export type ExecutionIntervalDto = Schemas['ExecutionIntervalDto'];
 export type PauseWorkRequest = Schemas['PauseWorkRequest'];
 export type CompleteExecutionRequest = Schemas['CompleteExecutionRequest'];
+
+// Field Tasks & Inspections
+export type WorkTaskDto = Schemas['WorkTaskDto'];
+export type CreateWorkTaskRequest = Schemas['CreateWorkTaskRequest'];
+export type UpdateWorkTaskStatusRequest = Schemas['UpdateWorkTaskStatusRequest'];
+

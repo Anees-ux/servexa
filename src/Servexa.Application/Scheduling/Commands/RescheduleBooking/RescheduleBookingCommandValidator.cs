@@ -23,7 +23,7 @@ public sealed class RescheduleBookingCommandValidator : AbstractValidator<Resche
         RuleFor(x => x.Reason)
             .NotEmpty()
             .WithMessage("Reschedule reason is required.")
-            .MaximumLength(1000)
-            .WithMessage("Reschedule reason must not exceed 1000 characters.");
+            .MaximumLength(500)
+            .WithMessage("Reschedule reason must not exceed 500 characters.");
     }
 }

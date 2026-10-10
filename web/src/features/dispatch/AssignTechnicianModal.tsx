@@ -10,6 +10,7 @@ import {
 } from '../../shared/api/queries';
 import { ApiError } from '../../shared/api/apiClient';
 import type { BookingDto } from '../../shared/api/types';
+import { formatSiteDateTime } from '../../shared/utils/timezone';
 
 interface AssignTechnicianModalProps {
   booking: BookingDto | null;
@@ -102,9 +103,8 @@ export const AssignTechnicianModal: React.FC<AssignTechnicianModalProps> = ({
           <br />
           Scheduled Window:{' '}
           <strong>
-            {new Date(booking.plannedStartUtc).toLocaleDateString()}{' '}
-            {new Date(booking.plannedStartUtc).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} –{' '}
-            {new Date(booking.plannedEndUtc).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            {formatSiteDateTime(booking.plannedStartUtc, booking.siteTimeZoneId)} to{' '}
+            {formatSiteDateTime(booking.plannedEndUtc, booking.siteTimeZoneId)}
           </strong>
         </div>
 
@@ -131,9 +131,13 @@ export const AssignTechnicianModal: React.FC<AssignTechnicianModalProps> = ({
         </Select>
 
         <Input
-          label="Selection Rationale"
+          label="Selection Rationale (Max 500 characters)"
           placeholder="e.g. Nearest available tech with certified HVAC skillset"
-          {...register('selectionRationale')}
+          maxLength={500}
+          {...register('selectionRationale', {
+            maxLength: { value: 500, message: 'Selection rationale must not exceed 500 characters' },
+          })}
+          error={errors.selectionRationale?.message}
         />
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>

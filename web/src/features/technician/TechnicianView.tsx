@@ -23,8 +23,10 @@ import {
   useStartWorkMutation,
   useResumeWorkMutation,
 } from '../../shared/api/queries';
+import { formatSiteDateTime } from '../../shared/utils/timezone';
 import { PauseWorkModal } from './PauseWorkModal';
 import { CompleteExecutionModal } from './CompleteExecutionModal';
+import { TechnicianJobTasks } from './TechnicianJobTasks';
 import type { AssignedJobDto } from '../../shared/api/types';
 
 export const TechnicianView: React.FC = () => {
@@ -93,19 +95,6 @@ export const TechnicianView: React.FC = () => {
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to resume work execution.';
       setActionError(message);
-    }
-  };
-
-  const formatDateTime = (dateStr: string) => {
-    try {
-      return new Intl.DateTimeFormat('en-US', {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      }).format(new Date(dateStr));
-    } catch {
-      return dateStr;
     }
   };
 
@@ -310,7 +299,7 @@ export const TechnicianView: React.FC = () => {
                       <div className="flex items-center gap-1.5">
                         <Clock className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0" />
                         <span>
-                          {formatDateTime(job.plannedStartUtc)} – {formatDateTime(job.plannedEndUtc)}
+                          {formatSiteDateTime(job.plannedStartUtc, job.siteTimeZoneId)} – {formatSiteDateTime(job.plannedEndUtc, job.siteTimeZoneId)}
                         </span>
                       </div>
                       {job.primaryAssetName && (
@@ -336,6 +325,9 @@ export const TechnicianView: React.FC = () => {
                         </p>
                       </div>
                     )}
+
+                    {/* Active Job Tasks & Checklists (FIE-003, FIE-011) */}
+                    <TechnicianJobTasks workOrderId={job.workOrderId} />
                   </div>
 
                   {/* Operational Action Controls */}

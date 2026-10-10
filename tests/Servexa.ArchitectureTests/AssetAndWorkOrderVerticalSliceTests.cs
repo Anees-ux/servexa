@@ -594,6 +594,21 @@ public class AssetAndWorkOrderVerticalSliceTests
 
         public Task<bool> ExistsAsync(Guid tenantId, string workOrderNumber, CancellationToken cancellationToken = default)
             => Task.FromResult(_items.Any(w => w.TenantId == tenantId && w.WorkOrderNumber.Equals(workOrderNumber, StringComparison.OrdinalIgnoreCase)));
+
+        public Task<WorkOrderScopeItem?> GetScopeItemByIdAsync(Guid tenantId, Guid workOrderId, Guid scopeItemId, CancellationToken cancellationToken = default)
+            => Task.FromResult(_items.FirstOrDefault(w => w.TenantId == tenantId && w.Id == workOrderId)?.ScopeItems.FirstOrDefault(s => s.Id == scopeItemId));
+
+        public Task AddScopeItemAsync(WorkOrderScopeItem scopeItem, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
+
+        public Task<IReadOnlyList<WorkOrderCompletionEvaluation>> GetCompletionEvaluationsAsync(Guid tenantId, Guid workOrderId, CancellationToken cancellationToken = default)
+            => Task.FromResult<IReadOnlyList<WorkOrderCompletionEvaluation>>(_items.FirstOrDefault(w => w.TenantId == tenantId && w.Id == workOrderId)?.CompletionEvaluations.ToList() ?? []);
+
+        public Task<WorkOrderCompletionEvaluation?> GetLatestCompletionEvaluationAsync(Guid tenantId, Guid workOrderId, CancellationToken cancellationToken = default)
+            => Task.FromResult(_items.FirstOrDefault(w => w.TenantId == tenantId && w.Id == workOrderId)?.CompletionEvaluations.OrderByDescending(e => e.EvaluatedAtUtc).FirstOrDefault());
+
+        public Task AddCompletionEvaluationAsync(WorkOrderCompletionEvaluation evaluation, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
     }
 
     private sealed class FakeAccountRepository : IAccountRepository

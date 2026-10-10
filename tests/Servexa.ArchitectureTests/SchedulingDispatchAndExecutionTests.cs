@@ -770,6 +770,96 @@ public class SchedulingDispatchAndExecutionTests
         Assert.Equal(WorkOrderOperationalStatus.Scheduled, refreshedWo.OperationalStatus);
     }
 
+    [Fact]
+    public void ValidatorAndDomainConsistency_SchedulingNotes_Enforces1000CharacterLimit()
+    {
+        var validator = new CreateBookingCommandValidator();
+        var validNotes = new string('A', 1000);
+        var invalidNotes = new string('A', 1001);
+
+        var validCommand = new CreateBookingCommand(
+            WorkOrderId: Guid.NewGuid(),
+            PlannedStartUtc: DateTime.UtcNow.AddHours(1),
+            PlannedEndUtc: DateTime.UtcNow.AddHours(3),
+            SchedulingNotes: validNotes);
+
+        var invalidCommand = new CreateBookingCommand(
+            WorkOrderId: Guid.NewGuid(),
+            PlannedStartUtc: DateTime.UtcNow.AddHours(1),
+            PlannedEndUtc: DateTime.UtcNow.AddHours(3),
+            SchedulingNotes: invalidNotes);
+
+        var validResult = validator.TestValidate(validCommand);
+        validResult.ShouldNotHaveValidationErrorFor(x => x.SchedulingNotes);
+
+        var invalidResult = validator.TestValidate(invalidCommand);
+        invalidResult.ShouldHaveValidationErrorFor(x => x.SchedulingNotes)
+            .WithErrorMessage("Scheduling notes must not exceed 1000 characters.");
+
+        // Domain invariant check
+        var ex = Assert.Throws<ArgumentException>(() => new Booking(
+            TenantA, "BKG-LIM", Guid.NewGuid(), SiteA,
+            DateTime.UtcNow.AddHours(1), DateTime.UtcNow.AddHours(2),
+            "UTC", BookingStatus.Scheduled, 1, invalidNotes, UserA));
+        Assert.Contains("1000 characters", ex.Message);
+    }
+
+    [Fact]
+    public void ValidatorAndDomainConsistency_WorkSummary_Enforces2000CharacterLimit()
+    {
+        var validator = new CompleteTechnicianExecutionCommandValidator();
+        var validSummary = new string('W', 2000);
+        var invalidSummary = new string('W', 2001);
+
+        var validCommand = new CompleteTechnicianExecutionCommand(Guid.NewGuid(), validSummary);
+        var invalidCommand = new CompleteTechnicianExecutionCommand(Guid.NewGuid(), invalidSummary);
+
+        var validResult = validator.TestValidate(validCommand);
+        validResult.ShouldNotHaveValidationErrorFor(x => x.WorkSummary);
+
+        var invalidResult = validator.TestValidate(invalidCommand);
+        invalidResult.ShouldHaveValidationErrorFor(x => x.WorkSummary)
+            .WithErrorMessage("Work summary must not exceed 2000 characters.");
+
+        // Domain invariant check
+        var session = new ExecutionSession(TenantA, Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), UserA);
+        session.StartWork();
+        var ex = Assert.Throws<ArgumentException>(() => session.EndSession(invalidSummary));
+        Assert.Contains("2000 characters", ex.Message);
+    }
+
+    [Fact]
+    public void ValidatorAndDomainConsistency_RescheduleAndCancelReasons_Enforce500CharacterLimit()
+    {
+        var rescheduleValidator = new RescheduleBookingCommandValidator();
+        var cancelValidator = new CancelBookingCommandValidator();
+
+        var validReason = new string('R', 500);
+        var invalidReason = new string('R', 501);
+
+        var validReschedule = new RescheduleBookingCommand(Guid.NewGuid(), DateTime.UtcNow.AddHours(1), DateTime.UtcNow.AddHours(2), validReason);
+        var invalidReschedule = new RescheduleBookingCommand(Guid.NewGuid(), DateTime.UtcNow.AddHours(1), DateTime.UtcNow.AddHours(2), invalidReason);
+
+        rescheduleValidator.TestValidate(validReschedule).ShouldNotHaveValidationErrorFor(x => x.Reason);
+        rescheduleValidator.TestValidate(invalidReschedule).ShouldHaveValidationErrorFor(x => x.Reason)
+            .WithErrorMessage("Reschedule reason must not exceed 500 characters.");
+
+        var validCancel = new CancelBookingCommand(Guid.NewGuid(), validReason);
+        var invalidCancel = new CancelBookingCommand(Guid.NewGuid(), invalidReason);
+
+        cancelValidator.TestValidate(validCancel).ShouldNotHaveValidationErrorFor(x => x.Reason);
+        cancelValidator.TestValidate(invalidCancel).ShouldHaveValidationErrorFor(x => x.Reason)
+            .WithErrorMessage("Cancellation reason must not exceed 500 characters.");
+
+        // Domain invariant checks
+        var booking = new Booking(TenantA, "BKG-REASON", Guid.NewGuid(), SiteA, DateTime.UtcNow.AddHours(1), DateTime.UtcNow.AddHours(2), "UTC", BookingStatus.Scheduled, 1, null, UserA);
+        var exReschedule = Assert.Throws<ArgumentException>(() => booking.Reschedule(DateTime.UtcNow.AddHours(3), DateTime.UtcNow.AddHours(4), invalidReason));
+        Assert.Contains("500 characters", exReschedule.Message);
+
+        var exCancel = Assert.Throws<ArgumentException>(() => booking.Cancel(invalidReason));
+        Assert.Contains("500 characters", exCancel.Message);
+    }
+
     #endregion
 
     #region Supporting Test Fakes

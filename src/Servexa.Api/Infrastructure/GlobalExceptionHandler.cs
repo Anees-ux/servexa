@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Servexa.Application.Exceptions;
 using Servexa.Domain.Exceptions;
 
@@ -154,6 +155,22 @@ public sealed class GlobalExceptionHandler(
                 StatusCodes.Status409Conflict,
                 "Domain Rule Violation",
                 domainEx.Message,
+                "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.10",
+                null
+            ),
+
+            DbUpdateConcurrencyException => (
+                StatusCodes.Status409Conflict,
+                "Concurrency Conflict",
+                "The operation could not be completed because the resource was modified concurrently by another process. Please reload and retry.",
+                "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.10",
+                null
+            ),
+
+            DbUpdateException => (
+                StatusCodes.Status409Conflict,
+                "Resource Conflict",
+                "A concurrent conflict or unique constraint violation occurred while persisting the record. Please reload and retry.",
                 "https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.10",
                 null
             ),

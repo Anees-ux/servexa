@@ -537,6 +537,93 @@ namespace Servexa.Infrastructure.Persistence.Migrations
                     b.ToTable("ExecutionSessions", "field");
                 });
 
+            modelBuilder.Entity("Servexa.Domain.Field.Entities.WorkTask", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AssetId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AssignmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("BookingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasPrecision(3)
+                        .HasColumnType("datetime2(3)");
+
+                    b.Property<Guid?>("CompletedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasPrecision(3)
+                        .HasColumnType("datetime2(3)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<short>("Gate")
+                        .HasColumnType("smallint");
+
+                    b.Property<bool>("IsRequired")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ModifiedAtUtc")
+                        .HasPrecision(3)
+                        .HasColumnType("datetime2(3)");
+
+                    b.Property<int>("Sequence")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SkipReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint");
+
+                    b.Property<short>("TaskType")
+                        .HasColumnType("smallint");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<byte[]>("Version")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<Guid>("WorkOrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("WorkOrderScopeItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasAlternateKey("TenantId", "Id");
+
+                    b.HasIndex("TenantId", "AssetId");
+
+                    b.HasIndex("TenantId", "AssignmentId");
+
+                    b.HasIndex("TenantId", "WorkOrderId", "Sequence");
+
+                    b.HasIndex("TenantId", "WorkOrderId", "Status");
+
+                    b.ToTable("WorkTasks", "field");
+                });
+
             modelBuilder.Entity("Servexa.Domain.Platform.Entities.Branch", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1680,6 +1767,119 @@ namespace Servexa.Infrastructure.Persistence.Migrations
                     b.ToTable("WorkOrderAssets", "service");
                 });
 
+            modelBuilder.Entity("Servexa.Domain.Service.Entities.WorkOrderCompletionEvaluation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CommandId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("EvaluatedAtUtc")
+                        .HasPrecision(3)
+                        .HasColumnType("datetime2(3)");
+
+                    b.Property<Guid?>("EvaluatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("GateResultsJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<short>("Outcome")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("PolicySnapshotJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Summary")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("TriggerBookingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("WorkOrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasAlternateKey("TenantId", "Id");
+
+                    b.HasIndex("TenantId", "CommandId")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "WorkOrderId", "EvaluatedAtUtc");
+
+                    b.ToTable("WorkOrderCompletionEvaluations", "service");
+                });
+
+            modelBuilder.Entity("Servexa.Domain.Service.Entities.WorkOrderScopeItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AssetId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasPrecision(3)
+                        .HasColumnType("datetime2(3)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("FulfilledAtUtc")
+                        .HasPrecision(3)
+                        .HasColumnType("datetime2(3)");
+
+                    b.Property<Guid?>("FulfilledByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsRequiredForCompletion")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ModifiedAtUtc")
+                        .HasPrecision(3)
+                        .HasColumnType("datetime2(3)");
+
+                    b.Property<short>("ScopeType")
+                        .HasColumnType("smallint");
+
+                    b.Property<int>("Sequence")
+                        .HasColumnType("int");
+
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("WorkOrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasAlternateKey("TenantId", "Id");
+
+                    b.HasIndex("TenantId", "AssetId");
+
+                    b.HasIndex("TenantId", "WorkOrderId", "Sequence");
+
+                    b.HasIndex("TenantId", "WorkOrderId", "Status");
+
+                    b.ToTable("WorkOrderScopeItems", "service");
+                });
+
             modelBuilder.Entity("Servexa.Domain.Service.Entities.WorkOrderStatusHistory", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1817,6 +2017,16 @@ namespace Servexa.Infrastructure.Persistence.Migrations
                     b.HasOne("Servexa.Domain.Field.Entities.ExecutionSession", null)
                         .WithMany("Intervals")
                         .HasForeignKey("TenantId", "ExecutionSessionId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Servexa.Domain.Field.Entities.WorkTask", b =>
+                {
+                    b.HasOne("Servexa.Domain.Service.Entities.WorkOrder", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "WorkOrderId")
                         .HasPrincipalKey("TenantId", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2045,6 +2255,26 @@ namespace Servexa.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Servexa.Domain.Service.Entities.WorkOrderCompletionEvaluation", b =>
+                {
+                    b.HasOne("Servexa.Domain.Service.Entities.WorkOrder", null)
+                        .WithMany("CompletionEvaluations")
+                        .HasForeignKey("TenantId", "WorkOrderId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Servexa.Domain.Service.Entities.WorkOrderScopeItem", b =>
+                {
+                    b.HasOne("Servexa.Domain.Service.Entities.WorkOrder", null)
+                        .WithMany("ScopeItems")
+                        .HasForeignKey("TenantId", "WorkOrderId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Servexa.Domain.Service.Entities.WorkOrderStatusHistory", b =>
                 {
                     b.HasOne("Servexa.Domain.Service.Entities.WorkOrder", null)
@@ -2087,6 +2317,10 @@ namespace Servexa.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Servexa.Domain.Service.Entities.WorkOrder", b =>
                 {
                     b.Navigation("Assets");
+
+                    b.Navigation("CompletionEvaluations");
+
+                    b.Navigation("ScopeItems");
 
                     b.Navigation("StatusHistory");
                 });

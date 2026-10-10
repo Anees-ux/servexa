@@ -13,7 +13,7 @@ public sealed class CancelBookingCommandValidator : AbstractValidator<CancelBook
         RuleFor(x => x.Reason)
             .NotEmpty()
             .WithMessage("Cancellation reason is required.")
-            .MaximumLength(1000)
-            .WithMessage("Cancellation reason must not exceed 1000 characters.");
+            .MaximumLength(500)
+            .WithMessage("Cancellation reason must not exceed 500 characters.");
     }
 }

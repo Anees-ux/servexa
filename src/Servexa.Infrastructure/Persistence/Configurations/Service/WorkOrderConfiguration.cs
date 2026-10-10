@@ -73,6 +73,18 @@ public sealed class WorkOrderConfiguration : IEntityTypeConfiguration<WorkOrder>
             .HasPrincipalKey(w => new { w.TenantId, w.Id })
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasMany(w => w.ScopeItems)
+            .WithOne()
+            .HasForeignKey(s => new { s.TenantId, s.WorkOrderId })
+            .HasPrincipalKey(w => new { w.TenantId, w.Id })
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(w => w.CompletionEvaluations)
+            .WithOne()
+            .HasForeignKey(e => new { e.TenantId, e.WorkOrderId })
+            .HasPrincipalKey(w => new { w.TenantId, w.Id })
+            .OnDelete(DeleteBehavior.Cascade);
+
         // Performance indexes per approved physical model
         builder.HasIndex(w => new { w.TenantId, w.OperationalStatus, w.Priority, w.CreatedAtUtc });
         builder.HasIndex(w => new { w.TenantId, w.PrimarySiteId, w.OperationalStatus });

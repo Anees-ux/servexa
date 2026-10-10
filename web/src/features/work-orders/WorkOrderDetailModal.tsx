@@ -7,6 +7,8 @@ import { Input } from '../../shared/design-system/Input';
 import { Modal } from '../../shared/design-system/Modal';
 import { Select } from '../../shared/design-system/Select';
 import { StatusBadge } from '../../shared/design-system/StatusBadge';
+import { WorkOrderCompletionSection } from './WorkOrderCompletionSection';
+import { WorkTasksSection } from './WorkTasksSection';
 
 interface WorkOrderDetailModalProps {
   workOrder: WorkOrderDto | null;
@@ -346,14 +348,6 @@ export const WorkOrderDetailModal: React.FC<WorkOrderDetailModalProps> = ({
                   Pause Execution
                 </Button>
                 <Button
-                  variant="primary"
-                  onClick={() => handleTransition(6)} // 6 = OperationallyComplete
-                  disabled={transitionMutation.isPending}
-                >
-                  <CheckCircle2 size={15} />
-                  Complete Operationally
-                </Button>
-                <Button
                   variant="danger"
                   onClick={handleOpenCancelDialog} // 7 = Cancelled
                   disabled={transitionMutation.isPending}
@@ -410,6 +404,17 @@ export const WorkOrderDetailModal: React.FC<WorkOrderDetailModalProps> = ({
             </p>
           )}
         </div>
+
+        {/* Field Work Tasks, Checklists & Inspections (FIE-003, FIE-011) */}
+        <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '16px' }}>
+          <WorkTasksSection workOrder={workOrder} />
+        </div>
+
+        {/* Operational Completion Readiness & Gated Scope Items */}
+        <WorkOrderCompletionSection
+          workOrder={workOrder}
+          onWorkOrderUpdated={(updated) => onUpdated?.(updated)}
+        />
 
         {/* Status History Ledger */}
         <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '16px' }}>

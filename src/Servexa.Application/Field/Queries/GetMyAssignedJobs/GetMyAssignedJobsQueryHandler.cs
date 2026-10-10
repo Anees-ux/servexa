@@ -95,6 +95,7 @@ public sealed class GetMyAssignedJobsQueryHandler(
                     PrimaryAssetName: assetName,
                     PlannedStartUtc: assignment.PlannedStartUtc,
                     PlannedEndUtc: assignment.PlannedEndUtc,
+                    SiteTimeZoneId: booking.SiteTimeZoneId,
                     AssignmentRole: assignment.AssignmentRole.ToString(),
                     AssignmentStatus: assignment.Status.ToString(),
                     AssignmentStatusValue: (short)assignment.Status,

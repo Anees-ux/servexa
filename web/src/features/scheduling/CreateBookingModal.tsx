@@ -8,8 +8,10 @@ import {
   useWorkOrdersQuery,
   useResourcesQuery,
   useCreateBookingMutation,
+  useSitesQuery,
 } from '../../shared/api/queries';
 import { ApiError } from '../../shared/api/apiClient';
+import { localDateTimeToUtcIso } from '../../shared/utils/timezone';
 
 interface CreateBookingModalProps {
   isOpen: boolean;
@@ -64,10 +66,21 @@ export const CreateBookingModal: React.FC<CreateBookingModalProps> = ({
     return d.toISOString().split('T')[0];
   }, []);
 
+  // Load sites to resolve authoritative site timezone
+  const { data: sitesData } = useSitesQuery(undefined, undefined, '', 1, 100);
+
+  const schedulableWorkOrders = (workOrdersData?.items || []).filter(
+    (wo) =>
+      wo.operationalStatus.toLowerCase() === 'approved' ||
+      wo.operationalStatus.toLowerCase() === 'scheduled' ||
+      wo.operationalStatus.toLowerCase() === 'inprogress'
+  );
+
   const {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<FormValues>({
     defaultValues: {
@@ -82,18 +95,16 @@ export const CreateBookingModal: React.FC<CreateBookingModalProps> = ({
     },
   });
 
-  const schedulableWorkOrders = (workOrdersData?.items || []).filter(
-    (wo) =>
-      wo.operationalStatus.toLowerCase() === 'approved' ||
-      wo.operationalStatus.toLowerCase() === 'scheduled' ||
-      wo.operationalStatus.toLowerCase() === 'inprogress'
-  );
+  const selectedWoId = watch('workOrderId') || preselectedWorkOrderId;
+  const selectedWo = schedulableWorkOrders.find((wo) => wo.id === selectedWoId);
+  const selectedSite = sitesData?.items?.find((s) => s.id === selectedWo?.primarySiteId);
+  const authoritativeTz = selectedSite?.timeZoneId || 'UTC';
 
   const onSubmit = async (data: FormValues) => {
     setErrorMessage(null);
     try {
-      const startIso = new Date(`${data.plannedStartDate}T${data.plannedStartTime}:00Z`).toISOString();
-      const endIso = new Date(`${data.plannedEndDate}T${data.plannedEndTime}:00Z`).toISOString();
+      const startIso = localDateTimeToUtcIso(data.plannedStartDate, data.plannedStartTime, authoritativeTz);
+      const endIso = localDateTimeToUtcIso(data.plannedEndDate, data.plannedEndTime, authoritativeTz);
 
       if (new Date(endIso) <= new Date(startIso)) {
         setErrorMessage('Planned end time must be after planned start time.');
@@ -104,8 +115,8 @@ export const CreateBookingModal: React.FC<CreateBookingModalProps> = ({
         workOrderId: data.workOrderId,
         plannedStartUtc: startIso,
         plannedEndUtc: endIso,
-        siteTimeZoneId: data.siteTimeZoneId || 'UTC',
-        schedulingNotes: data.schedulingNotes || null,
+        siteTimeZoneId: authoritativeTz,
+        schedulingNotes: data.schedulingNotes ? data.schedulingNotes.trim() : null,
         primaryResourceId: data.primaryResourceId ? data.primaryResourceId : null,
       });
 
@@ -152,6 +163,20 @@ export const CreateBookingModal: React.FC<CreateBookingModalProps> = ({
           ))}
         </Select>
 
+        <div
+          style={{
+            fontSize: '12px',
+            padding: '8px 12px',
+            backgroundColor: '#f1f5f9',
+            borderRadius: '6px',
+            color: '#334155',
+            border: '1px solid #e2e8f0',
+          }}
+        >
+          Site Timezone: <strong>{authoritativeTz}</strong>
+          {selectedSite ? ` (${selectedSite.name})` : ''} — Scheduling times are entered in Site-local time and saved as UTC.
+        </div>
+
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
           <Input
             label="Start Date *"
@@ -160,7 +185,7 @@ export const CreateBookingModal: React.FC<CreateBookingModalProps> = ({
             error={errors.plannedStartDate?.message}
           />
           <Input
-            label="Start Time (UTC) *"
+            label={`Start Time (${authoritativeTz}) *`}
             type="time"
             {...register('plannedStartTime', { required: 'Start time is required' })}
             error={errors.plannedStartTime?.message}
@@ -175,7 +200,7 @@ export const CreateBookingModal: React.FC<CreateBookingModalProps> = ({
             error={errors.plannedEndDate?.message}
           />
           <Input
-            label="End Time (UTC) *"
+            label={`End Time (${authoritativeTz}) *`}
             type="time"
             {...register('plannedEndTime', { required: 'End time is required' })}
             error={errors.plannedEndTime?.message}
@@ -196,9 +221,11 @@ export const CreateBookingModal: React.FC<CreateBookingModalProps> = ({
         </Select>
 
         <Input
-          label="Scheduling Notes"
+          label="Scheduling Notes (Max 1000 characters)"
           placeholder="Access instructions, customer window preferences..."
-          {...register('schedulingNotes')}
+          maxLength={1000}
+          {...register('schedulingNotes', { maxLength: { value: 1000, message: 'Scheduling notes must not exceed 1000 characters' } })}
+          error={errors.schedulingNotes?.message}
         />
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>

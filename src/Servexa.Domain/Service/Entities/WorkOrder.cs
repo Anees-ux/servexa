@@ -13,6 +13,8 @@ public class WorkOrder
 {
     private readonly List<WorkOrderAsset> _assets = [];
     private readonly List<WorkOrderStatusHistory> _statusHistory = [];
+    private readonly List<WorkOrderScopeItem> _scopeItems = [];
+    private readonly List<WorkOrderCompletionEvaluation> _completionEvaluations = [];
 
     // Parameterless constructor for EF Core instantiation
     private WorkOrder()
@@ -107,6 +109,20 @@ public class WorkOrder
 
     public IReadOnlyCollection<WorkOrderAsset> Assets => _assets.AsReadOnly();
     public IReadOnlyCollection<WorkOrderStatusHistory> StatusHistory => _statusHistory.AsReadOnly();
+    public IReadOnlyCollection<WorkOrderScopeItem> ScopeItems => _scopeItems.AsReadOnly();
+    public IReadOnlyCollection<WorkOrderCompletionEvaluation> CompletionEvaluations => _completionEvaluations.AsReadOnly();
+
+    public void AddScopeItem(WorkOrderScopeItem scopeItem)
+    {
+        ArgumentNullException.ThrowIfNull(scopeItem);
+        if (OperationalStatus == WorkOrderOperationalStatus.OperationallyComplete || OperationalStatus == WorkOrderOperationalStatus.Cancelled)
+        {
+            throw new InvalidOperationException($"Cannot add scope items when work order is '{OperationalStatus}'.");
+        }
+
+        _scopeItems.Add(scopeItem);
+        ModifiedAtUtc = DateTime.UtcNow;
+    }
 
     public void AttachAsset(Guid assetId, Guid siteIdAtTime, WorkOrderAssetRole role = WorkOrderAssetRole.Primary)
     {
@@ -192,9 +208,11 @@ public class WorkOrder
 
     public void Complete(Guid? changedByUserId = null, DateTime? completedAtUtc = null)
     {
-        if (OperationalStatus != WorkOrderOperationalStatus.InProgress && OperationalStatus != WorkOrderOperationalStatus.Paused)
+        if (OperationalStatus != WorkOrderOperationalStatus.InProgress &&
+            OperationalStatus != WorkOrderOperationalStatus.Paused &&
+            OperationalStatus != WorkOrderOperationalStatus.Scheduled)
         {
-            throw new InvalidOperationException($"Only InProgress or Paused work orders can be completed. Current status: '{OperationalStatus}'.");
+            throw new InvalidOperationException($"Only InProgress, Paused, or Scheduled work orders can be completed. Current status: '{OperationalStatus}'.");
         }
 
         OperationallyCompletedAtUtc = completedAtUtc ?? DateTime.UtcNow;
@@ -202,6 +220,26 @@ public class WorkOrder
         PauseNote = null;
 
         RecordTransition(WorkOrderOperationalStatus.OperationallyComplete, changedByUserId, reason: "Work operationally completed");
+    }
+
+    public void CompleteWithEvaluation(WorkOrderCompletionEvaluation evaluation, Guid userId)
+    {
+        ArgumentNullException.ThrowIfNull(evaluation);
+
+        if (evaluation.Outcome != WorkOrderCompletionOutcome.OperationallyComplete)
+        {
+            throw new InvalidOperationException($"Cannot complete work order with non-complete evaluation outcome '{evaluation.Outcome}'.");
+        }
+
+        _completionEvaluations.Add(evaluation);
+        Complete(userId, evaluation.EvaluatedAtUtc);
+    }
+
+    public void RecordEvaluation(WorkOrderCompletionEvaluation evaluation)
+    {
+        ArgumentNullException.ThrowIfNull(evaluation);
+        _completionEvaluations.Add(evaluation);
+        ModifiedAtUtc = DateTime.UtcNow;
     }
 
     public void Reopen(string reason, Guid? changedByUserId = null)

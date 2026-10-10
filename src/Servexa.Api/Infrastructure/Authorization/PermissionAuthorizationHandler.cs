@@ -5,6 +5,8 @@ namespace Servexa.Api.Infrastructure.Authorization;
 
 public sealed class PermissionAuthorizationHandler(ITenantContext tenantContext) : AuthorizationHandler<PermissionRequirement>
 {
+    private static readonly char[] Separators = ['|'];
+
     protected override Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
         PermissionRequirement requirement)
@@ -14,7 +16,8 @@ public sealed class PermissionAuthorizationHandler(ITenantContext tenantContext)
             return Task.CompletedTask;
         }
 
-        if (tenantContext.HasPermission(requirement.Permission))
+        var permissions = requirement.Permission.Split(Separators, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (permissions.Any(tenantContext.HasPermission))
         {
             context.Succeed(requirement);
         }

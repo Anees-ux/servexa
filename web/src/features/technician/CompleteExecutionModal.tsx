@@ -73,14 +73,18 @@ export const CompleteExecutionModal: React.FC<CompleteExecutionModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-700 dark:text-neutral-300 mb-1">
-              Work Summary & Observations <span className="text-red-500">*</span>
-            </label>
+            <div className="flex justify-between items-center mb-1">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-700 dark:text-neutral-300">
+                Work Summary & Observations <span className="text-red-500">*</span>
+              </label>
+              <span className="text-xs text-neutral-400">{workSummary.length}/2000</span>
+            </div>
             <textarea
               value={workSummary}
               onChange={(e) => setWorkSummary(e.target.value)}
               placeholder="Detail all corrective actions taken, parts replaced, diagnostic readings, and equipment status..."
               rows={4}
+              maxLength={2000}
               required
               className="w-full text-sm rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 p-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />

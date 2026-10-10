@@ -69,6 +69,10 @@ public sealed class Booking
         Status = status;
         DispatchStatus = BookingDispatchStatus.Unassigned;
         Sequence = sequence > 0 ? sequence : 1;
+        if (schedulingNotes != null && schedulingNotes.Trim().Length > 1000)
+        {
+            throw new ArgumentException("Scheduling notes cannot exceed 1000 characters.", nameof(schedulingNotes));
+        }
         SchedulingNotes = schedulingNotes?.Trim();
         CreatedAtUtc = DateTime.UtcNow;
         ModifiedAtUtc = DateTime.UtcNow;
@@ -119,6 +123,10 @@ public sealed class Booking
             throw new ArgumentException("New end time must be greater than new start time.", nameof(newEndUtc));
         }
         ArgumentException.ThrowIfNullOrWhiteSpace(reason);
+        if (reason.Trim().Length > 500)
+        {
+            throw new ArgumentException("Reschedule reason cannot exceed 500 characters.", nameof(reason));
+        }
 
         var prevStart = PlannedStartUtc;
         var prevEnd = PlannedEndUtc;
@@ -226,6 +234,10 @@ public sealed class Booking
     public void Cancel(string reason, Guid? changedByUserId = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(reason);
+        if (reason.Trim().Length > 500)
+        {
+            throw new ArgumentException("Cancellation reason cannot exceed 500 characters.", nameof(reason));
+        }
         if (Status == BookingStatus.Completed)
         {
             throw new InvalidOperationException("Cannot cancel an already completed booking.");

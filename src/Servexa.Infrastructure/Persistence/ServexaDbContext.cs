@@ -36,6 +36,8 @@ public class ServexaDbContext(DbContextOptions<ServexaDbContext> options) : DbCo
     public DbSet<Domain.Service.Entities.WorkOrder> WorkOrders => Set<Domain.Service.Entities.WorkOrder>();
     public DbSet<Domain.Service.Entities.WorkOrderAsset> WorkOrderAssets => Set<Domain.Service.Entities.WorkOrderAsset>();
     public DbSet<Domain.Service.Entities.WorkOrderStatusHistory> WorkOrderStatusHistories => Set<Domain.Service.Entities.WorkOrderStatusHistory>();
+    public DbSet<Domain.Service.Entities.WorkOrderScopeItem> WorkOrderScopeItems => Set<Domain.Service.Entities.WorkOrderScopeItem>();
+    public DbSet<Domain.Service.Entities.WorkOrderCompletionEvaluation> WorkOrderCompletionEvaluations => Set<Domain.Service.Entities.WorkOrderCompletionEvaluation>();
 
     // Scheduling Module
     public DbSet<Domain.Scheduling.Entities.Resource> Resources => Set<Domain.Scheduling.Entities.Resource>();
@@ -50,6 +52,7 @@ public class ServexaDbContext(DbContextOptions<ServexaDbContext> options) : DbCo
     // Field Execution Module
     public DbSet<Domain.Field.Entities.ExecutionSession> ExecutionSessions => Set<Domain.Field.Entities.ExecutionSession>();
     public DbSet<Domain.Field.Entities.ExecutionInterval> ExecutionIntervals => Set<Domain.Field.Entities.ExecutionInterval>();
+    public DbSet<Domain.Field.Entities.WorkTask> WorkTasks => Set<Domain.Field.Entities.WorkTask>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

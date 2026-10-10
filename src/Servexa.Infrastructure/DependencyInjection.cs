@@ -54,6 +54,7 @@ public static class DependencyInjection
         services.AddScoped<Application.Scheduling.Repositories.IResourceRepository, ResourceRepository>();
         services.AddScoped<Application.Scheduling.Repositories.IResourceCommitmentRepository, ResourceCommitmentRepository>();
         services.AddScoped<Application.Field.Repositories.IExecutionSessionRepository, ExecutionSessionRepository>();
+        services.AddScoped<Application.Field.Repositories.IWorkTaskRepository, WorkTaskRepository>();
 
         return services;
     }

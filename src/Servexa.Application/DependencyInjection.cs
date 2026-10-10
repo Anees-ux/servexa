@@ -22,6 +22,8 @@ public static class DependencyInjection
 
         services.AddAutoMapper(cfg => cfg.AddMaps(assembly));
 
+        services.AddScoped<Service.Services.IWorkOrderCompletionEngine, Service.Services.WorkOrderCompletionEngine>();
+
         return services;
     }
 }

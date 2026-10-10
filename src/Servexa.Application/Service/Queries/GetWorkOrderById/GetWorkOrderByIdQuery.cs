@@ -60,6 +60,50 @@ public sealed class GetWorkOrderByIdQueryHandler(
             h.ChangedAtUtc,
             h.Reason)).OrderByDescending(h => h.ChangedAtUtc).ToList();
 
+        var scopeItemDtos = workOrder.ScopeItems.Select(s => new WorkOrderScopeItemDto(
+            s.Id,
+            s.WorkOrderId,
+            s.Sequence,
+            s.ScopeType.ToString(),
+            (short)s.ScopeType,
+            s.Description,
+            s.Status.ToString(),
+            (short)s.Status,
+            s.IsRequiredForCompletion,
+            s.AssetId,
+            s.FulfilledAtUtc,
+            s.FulfilledByUserId,
+            s.CreatedAtUtc,
+            s.ModifiedAtUtc)).ToList();
+
+        var latestEval = workOrder.CompletionEvaluations.OrderByDescending(e => e.EvaluatedAtUtc).FirstOrDefault();
+        WorkOrderCompletionEvaluationDto? latestEvalDto = null;
+        if (latestEval != null)
+        {
+            IReadOnlyList<CompletionGateResultDto> gates = [];
+            try
+            {
+                gates = System.Text.Json.JsonSerializer.Deserialize<List<CompletionGateResultDto>>(latestEval.GateResultsJson) ?? [];
+            }
+            catch
+            {
+            }
+
+            latestEvalDto = new WorkOrderCompletionEvaluationDto(
+                latestEval.Id,
+                latestEval.WorkOrderId,
+                latestEval.CommandId,
+                latestEval.EvaluatedAtUtc,
+                latestEval.EvaluatedByUserId,
+                latestEval.Outcome.ToString(),
+                (short)latestEval.Outcome,
+                latestEval.IsEligibleForCompletion,
+                gates,
+                latestEval.TriggerBookingId,
+                latestEval.Summary,
+                latestEval.Notes);
+        }
+
         return new WorkOrderDto(
             workOrder.Id,
             workOrder.TenantId,
@@ -84,6 +128,8 @@ public sealed class GetWorkOrderByIdQueryHandler(
             workOrder.CreatedAtUtc,
             workOrder.ModifiedAtUtc,
             assetDtos,
-            historyDtos);
+            historyDtos,
+            scopeItemDtos,
+            latestEvalDto);
     }
 }

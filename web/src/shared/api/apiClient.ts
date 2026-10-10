@@ -25,6 +25,15 @@ import type {
   ExecutionSessionDto,
   PauseWorkRequest,
   CompleteExecutionRequest,
+  WorkOrderCompletionReadinessDto,
+  WorkOrderCompletionEvaluationDto,
+  CompleteWorkOrderRequest,
+  AddScopeItemRequest,
+  UpdateScopeItemStatusRequest,
+  WorkOrderScopeItemDto,
+  WorkTaskDto,
+  CreateWorkTaskRequest,
+  UpdateWorkTaskStatusRequest,
 } from './types';
 
 export interface ProblemDetailsResponse {
@@ -262,6 +271,69 @@ class ApiClient {
   public async transitionWorkOrderStatus(id: string, req: TransitionWorkOrderStatusRequest): Promise<WorkOrderDto> {
     return this.request<WorkOrderDto>(`/work-orders/${id}/transition`, {
       method: 'POST',
+      body: JSON.stringify(req),
+    });
+  }
+
+  public async getWorkOrderCompletionEvaluation(id: string): Promise<WorkOrderCompletionReadinessDto> {
+    return this.request<WorkOrderCompletionReadinessDto>(`/work-orders/${id}/completion-evaluation`);
+  }
+
+  public async getWorkOrderCompletionHistory(id: string): Promise<WorkOrderCompletionEvaluationDto[]> {
+    return this.request<WorkOrderCompletionEvaluationDto[]>(`/work-orders/${id}/completion-evaluations`);
+  }
+
+  public async completeWorkOrder(id: string, req: CompleteWorkOrderRequest): Promise<WorkOrderDto> {
+    return this.request<WorkOrderDto>(`/work-orders/${id}/complete`, {
+      method: 'POST',
+      body: JSON.stringify(req),
+    });
+  }
+
+  public async addWorkOrderScopeItem(id: string, req: AddScopeItemRequest): Promise<WorkOrderScopeItemDto> {
+    return this.request<WorkOrderScopeItemDto>(`/work-orders/${id}/scope-items`, {
+      method: 'POST',
+      body: JSON.stringify(req),
+    });
+  }
+
+  public async updateWorkOrderScopeItemStatus(
+    id: string,
+    itemId: string,
+    req: UpdateScopeItemStatusRequest
+  ): Promise<WorkOrderScopeItemDto> {
+    return this.request<WorkOrderScopeItemDto>(`/work-orders/${id}/scope-items/${itemId}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify(req),
+    });
+  }
+
+  // Work Tasks & Inspections API
+  public async getWorkTasks(
+    workOrderId: string,
+    params?: { assignmentId?: string; assetId?: string }
+  ): Promise<WorkTaskDto[]> {
+    const query = new URLSearchParams();
+    if (params?.assignmentId) query.set('assignmentId', params.assignmentId);
+    if (params?.assetId) query.set('assetId', params.assetId);
+    const qs = query.toString();
+    return this.request<WorkTaskDto[]>(`/work-orders/${workOrderId}/tasks${qs ? `?${qs}` : ''}`);
+  }
+
+  public async createWorkTask(workOrderId: string, req: CreateWorkTaskRequest): Promise<WorkTaskDto> {
+    return this.request<WorkTaskDto>(`/work-orders/${workOrderId}/tasks`, {
+      method: 'POST',
+      body: JSON.stringify(req),
+    });
+  }
+
+  public async updateWorkTaskStatus(
+    workOrderId: string,
+    taskId: string,
+    req: UpdateWorkTaskStatusRequest
+  ): Promise<WorkTaskDto> {
+    return this.request<WorkTaskDto>(`/work-orders/${workOrderId}/tasks/${taskId}/status`, {
+      method: 'PATCH',
       body: JSON.stringify(req),
     });
   }

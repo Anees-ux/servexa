@@ -81,9 +81,13 @@ export const CancelBookingModal: React.FC<CancelBookingModalProps> = ({
         </p>
 
         <Input
-          label="Cancellation Reason *"
+          label="Cancellation Reason (Max 500 characters) *"
           placeholder="e.g. Customer cancelled, duplicate appointment, site inaccessible..."
-          {...register('reason', { required: 'Cancellation reason is required' })}
+          maxLength={500}
+          {...register('reason', {
+            required: 'Cancellation reason is required',
+            maxLength: { value: 500, message: 'Cancellation reason must not exceed 500 characters' },
+          })}
           error={errors.reason?.message}
         />
 

@@ -13,5 +13,9 @@ public interface IExecutionSessionRepository
         int skip,
         int take,
         CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<ExecutionSession>> GetSessionsForWorkOrderAsync(
+        Guid tenantId,
+        Guid workOrderId,
+        CancellationToken cancellationToken = default);
     Task AddAsync(ExecutionSession session, CancellationToken cancellationToken = default);
 }

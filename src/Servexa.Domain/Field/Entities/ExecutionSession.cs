@@ -102,6 +102,10 @@ public sealed class ExecutionSession
     public void EndSession(string workSummary)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(workSummary);
+        if (workSummary.Trim().Length > 2000)
+        {
+            throw new ArgumentException("Work summary cannot exceed 2000 characters.", nameof(workSummary));
+        }
         CloseOpenInterval();
         Status = ExecutionSessionStatus.Ended;
         CompletedAtUtc = DateTime.UtcNow;

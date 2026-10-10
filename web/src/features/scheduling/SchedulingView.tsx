@@ -8,6 +8,7 @@ import { CreateBookingModal } from './CreateBookingModal';
 import { RescheduleBookingModal } from './RescheduleBookingModal';
 import { CancelBookingModal } from './CancelBookingModal';
 import type { BookingDto } from '../../shared/api/types';
+import { formatSiteDateTime } from '../../shared/utils/timezone';
 
 export const SchedulingView: React.FC = () => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -194,11 +195,10 @@ export const SchedulingView: React.FC = () => {
                     <td style={{ padding: '12px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <Clock size={13} color="var(--text-muted)" />
-                        <span>{new Date(b.plannedStartUtc).toLocaleDateString()}</span>
+                        <span style={{ fontWeight: 500 }}>{formatSiteDateTime(b.plannedStartUtc, b.siteTimeZoneId)}</span>
                       </div>
                       <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                        {new Date(b.plannedStartUtc).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} –{' '}
-                        {new Date(b.plannedEndUtc).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        End: {formatSiteDateTime(b.plannedEndUtc, b.siteTimeZoneId)}
                       </div>
                     </td>
                     <td style={{ padding: '12px' }}>

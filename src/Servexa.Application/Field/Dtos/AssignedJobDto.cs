@@ -17,6 +17,7 @@ public sealed record AssignedJobDto(
     string? PrimaryAssetName,
     DateTime PlannedStartUtc,
     DateTime PlannedEndUtc,
+    string SiteTimeZoneId,
     string AssignmentRole,
     string AssignmentStatus,
     short AssignmentStatusValue,

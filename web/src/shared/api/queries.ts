@@ -25,6 +25,15 @@ import type {
   ExecutionSessionDto,
   PauseWorkRequest,
   CompleteExecutionRequest,
+  WorkOrderCompletionReadinessDto,
+  WorkOrderCompletionEvaluationDto,
+  CompleteWorkOrderRequest,
+  AddScopeItemRequest,
+  UpdateScopeItemStatusRequest,
+  WorkOrderScopeItemDto,
+  WorkTaskDto,
+  CreateWorkTaskRequest,
+  UpdateWorkTaskStatusRequest,
 } from './types';
 
 // Query Keys
@@ -65,6 +74,9 @@ export const workOrderKeys = {
   list: (params: { serviceAccountId?: string; primarySiteId?: string; operationalStatus?: number; priority?: number; search?: string; pageNumber?: number; pageSize?: number }) =>
     [...workOrderKeys.lists(), params] as const,
   detail: (id: string) => [...workOrderKeys.all, 'detail', id] as const,
+  completionEvaluation: (id: string) => [...workOrderKeys.all, 'completion-evaluation', id] as const,
+  completionHistory: (id: string) => [...workOrderKeys.all, 'completion-history', id] as const,
+  tasks: (id: string, params?: { assignmentId?: string; assetId?: string }) => [...workOrderKeys.all, 'tasks', id, params] as const,
 };
 
 export const bookingKeys = {
@@ -241,6 +253,99 @@ export function useTransitionWorkOrderStatusMutation() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: workOrderKeys.all });
       queryClient.invalidateQueries({ queryKey: workOrderKeys.detail(data.id) });
+    },
+  });
+}
+
+export function useWorkOrderCompletionEvaluationQuery(id?: string, enabled = true) {
+  return useQuery<WorkOrderCompletionReadinessDto, Error>({
+    queryKey: id ? workOrderKeys.completionEvaluation(id) : ['work-orders', 'completion-evaluation', 'none'],
+    queryFn: () => api.getWorkOrderCompletionEvaluation(id!),
+    enabled: Boolean(id) && enabled,
+  });
+}
+
+export function useWorkOrderCompletionHistoryQuery(id?: string, enabled = true) {
+  return useQuery<WorkOrderCompletionEvaluationDto[], Error>({
+    queryKey: id ? workOrderKeys.completionHistory(id) : ['work-orders', 'completion-history', 'none'],
+    queryFn: () => api.getWorkOrderCompletionHistory(id!),
+    enabled: Boolean(id) && enabled,
+  });
+}
+
+export function useCompleteWorkOrderMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<WorkOrderDto, Error, { id: string; request: CompleteWorkOrderRequest }>({
+    mutationFn: ({ id, request }) => api.completeWorkOrder(id, request),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: workOrderKeys.all });
+      queryClient.invalidateQueries({ queryKey: workOrderKeys.detail(data.id) });
+      queryClient.invalidateQueries({ queryKey: workOrderKeys.completionEvaluation(data.id) });
+      queryClient.invalidateQueries({ queryKey: workOrderKeys.completionHistory(data.id) });
+    },
+  });
+}
+
+export function useAddScopeItemMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<WorkOrderScopeItemDto, Error, { id: string; request: AddScopeItemRequest }>({
+    mutationFn: ({ id, request }) => api.addWorkOrderScopeItem(id, request),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: workOrderKeys.all });
+      queryClient.invalidateQueries({ queryKey: workOrderKeys.detail(data.workOrderId) });
+      queryClient.invalidateQueries({ queryKey: workOrderKeys.completionEvaluation(data.workOrderId) });
+    },
+  });
+}
+
+export function useUpdateScopeItemStatusMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<WorkOrderScopeItemDto, Error, { id: string; itemId: string; request: UpdateScopeItemStatusRequest }>({
+    mutationFn: ({ id, itemId, request }) => api.updateWorkOrderScopeItemStatus(id, itemId, request),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: workOrderKeys.all });
+      queryClient.invalidateQueries({ queryKey: workOrderKeys.detail(data.workOrderId) });
+      queryClient.invalidateQueries({ queryKey: workOrderKeys.completionEvaluation(data.workOrderId) });
+    },
+  });
+}
+
+// Work Tasks & Inspections Queries & Mutations
+export function useWorkTasksQuery(
+  workOrderId?: string,
+  params?: { assignmentId?: string; assetId?: string },
+  enabled = true
+) {
+  return useQuery<WorkTaskDto[], Error>({
+    queryKey: workOrderId ? workOrderKeys.tasks(workOrderId, params) : ['work-orders', 'tasks', 'none'],
+    queryFn: () => api.getWorkTasks(workOrderId!, params),
+    enabled: Boolean(workOrderId) && enabled,
+  });
+}
+
+export function useCreateWorkTaskMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<WorkTaskDto, Error, { workOrderId: string; request: CreateWorkTaskRequest }>({
+    mutationFn: ({ workOrderId, request }) => api.createWorkTask(workOrderId, request),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: workOrderKeys.tasks(data.workOrderId) });
+      queryClient.invalidateQueries({ queryKey: workOrderKeys.completionEvaluation(data.workOrderId) });
+    },
+  });
+}
+
+export function useUpdateWorkTaskStatusMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<WorkTaskDto, Error, { workOrderId: string; taskId: string; request: UpdateWorkTaskStatusRequest }>({
+    mutationFn: ({ workOrderId, taskId, request }) => api.updateWorkTaskStatus(workOrderId, taskId, request),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: workOrderKeys.tasks(data.workOrderId) });
+      queryClient.invalidateQueries({ queryKey: workOrderKeys.completionEvaluation(data.workOrderId) });
     },
   });
 }
